@@ -2,6 +2,12 @@
 Release Notes
 #############
 
+******************************************************
+[0.7.0] Support modifying image rotation. (2019-06-23)
+******************************************************
+
+Add support for modifying metadata with the SHORT datatype (e.g. image orientation).
+
 *******************************************
 [0.6.0] Drop Python 2 support. (2019-06-16)
 *******************************************
