@@ -58,8 +58,9 @@ class TestModifyExif(unittest.TestCase):
                          MODIFY_ASCII_SHORTER_HEX_BASELINE)
 
     def test_modify_orientation(self):
-        """Verify that modifying a SRATIONAL tag updates the tag value as expected."""
+        """Verify that modifying the orientation (a short tag) updates the tag value as expected."""
         assert self.image.orientation == 1
+        assert repr(self.image.orientation) == Baseline("""<Orientation.TOP_LEFT: 1>""")
 
         self.image.orientation = 6
         assert self.image.orientation == 6

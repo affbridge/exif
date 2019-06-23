@@ -7,7 +7,7 @@ from fractions import Fraction
 
 from exif._constants import (
     ATTRIBUTE_ID_MAP, ColorSpace, EXIF_LITTLE_ENDIAN_HEADER, EXIF_POINTER_TAG_ID, ExifTypes,
-    GPS_POINTER_TAG_ID, Saturation, Sharpness)
+    GPS_POINTER_TAG_ID, Saturation, Sharpness, Orientation)
 
 
 class IfdTag:
@@ -232,6 +232,8 @@ class IfdTag:
 
         if self.tag == ATTRIBUTE_ID_MAP["color_space"]:
             retval = ColorSpace(read_number)
+        elif self.tag == ATTRIBUTE_ID_MAP["orientation"]:
+            retval = Orientation(read_number)
         elif self.tag == ATTRIBUTE_ID_MAP["saturation"]:
             retval = Saturation(read_number)
         elif self.tag == ATTRIBUTE_ID_MAP["sharpness"]:
