@@ -33,7 +33,7 @@ class TestInvalidFiles(unittest.TestCase):
         with open(image_path, 'rb') as image_file:
             my_image = Image(image_file)
 
-        assert not my_image.has_exif
+        self.assertFalse(my_image.has_exif)
 
     def test_no_app1_segment(self):
         """Verify behavior of an image without an APP1 segment marker.
@@ -46,12 +46,10 @@ class TestInvalidFiles(unittest.TestCase):
         with open(image_path, 'rb') as image_file:
             my_image = Image(image_file)
 
-        assert not my_image.has_exif
+        self.assertFalse(my_image.has_exif)
 
         self.assertEqual(str(dir(my_image)), Baseline("""
             ['_segments', 'get', 'get_file', 'has_exif']
             """))
 
         self.assertEqual('\n'.join(textwrap.wrap(str(my_image.get_file()), 90)), NO_APP1_PNG)
-
-

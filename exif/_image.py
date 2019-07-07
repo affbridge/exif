@@ -35,14 +35,16 @@ class Image:
             # Determine the expected length of the APP1 segment.
 
             app1_len = int(
-                img_hex[app1_start_index + 2 * HEX_PER_BYTE:app1_start_index + 4 * HEX_PER_BYTE], 16)
+                img_hex[app1_start_index + 2 * HEX_PER_BYTE:app1_start_index + 4 * HEX_PER_BYTE],
+                16
+            )
             cursor += app1_len * HEX_PER_BYTE
 
-            # If the expected length stops early, keep traversing until another section prefix is found.
+            # If the expected length stops early, keep traversing until another section is found.
             while img_hex[cursor - 2:cursor] != ExifMarkers.SEG_PREFIX:
                 cursor += 2
+                # raise IOError("no subsequent EXIF segment found, is this an EXIF-encoded JPEG?")
                 if cursor > len(img_hex):
-                    # raise IOError("no subsequent EXIF segment found, is this an EXIF-encoded JPEG?")
                     self.has_exif = False
                     break
 
