@@ -8,12 +8,14 @@ Release Notes
 
 This patch addresses the following GitHub user issues:
 
-* Update PyPI classification to more clearly indicate that this package only supports Python 3.
+- Update PyPI classification to more clearly indicate that this package only supports Python 3.
   (See https://github.com/TNThieding/exif/issues/20 for discussion.)
+- Add read-only support for Windows XP style tags. (See https://github.com/TNThieding/exif/issues/22
+  for more information.)
 
 This patch also addresses the following issues:
 
-* The ``offset_time_digitized`` was previously incorrectly mapped to ``offset_time_original``.
+- The ``offset_time_digitized`` was previously incorrectly mapped to ``offset_time_original``.
 
 ***************************************************
 [0.8.1] Restructure tag type behavior. (2019-07-28)
