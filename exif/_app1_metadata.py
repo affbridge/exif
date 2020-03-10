@@ -140,7 +140,7 @@ class App1MetaData:
             for tag_index in range(num_ifd_tags):  # pylint: disable=unused-variable
                 tag_id = self._segment_hex.read(cursor, BYTES_PER_IFD_TAG_ID)
                 cursor += BYTES_PER_IFD_TAG_ID
-                tag_type = int(self._segment_hex.read(cursor, BYTES_PER_IFD_TAG_ID), 16)
+                tag_type = int(self._segment_hex.read(cursor, BYTES_PER_IFD_TAG_TYPE), 16)
                 cursor += BYTES_PER_IFD_TAG_TYPE
                 tag_count = self._segment_hex.read(cursor, BYTES_PER_IFD_TAG_COUNT)
                 cursor += BYTES_PER_IFD_TAG_COUNT

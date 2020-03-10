@@ -12,6 +12,8 @@ This patch addresses the following GitHub user issues:
   (See https://github.com/TNThieding/exif/issues/20 for discussion.)
 - Add read-only support for Windows XP style tags. (See https://github.com/TNThieding/exif/issues/22
   for more information.)
+- Fix a benign cursor increment bug in ``_app1_metadata.py``. (See
+  https://github.com/TNThieding/exif/issues/18 for more information.)
 
 This patch also addresses the following issues:
 
