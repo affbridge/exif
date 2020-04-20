@@ -2,7 +2,6 @@
 
 import warnings
 
-from exif._constants import HEX_PER_BYTE
 from exif._ifd_tag._base import Base as BaseIfdTag
 
 
