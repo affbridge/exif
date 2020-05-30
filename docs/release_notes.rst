@@ -7,7 +7,7 @@ Release Notes
 *******************************************************************************
 
 Previously, using ``get()`` to read a tag that can't be read by this package
-raised a ``NotImplementedError`. Now, ``get()`` returns the default value (i.e.,
+raised a ``NotImplementedError``. Now, ``get()`` returns the default value (i.e.,
 ``None`` if not specified otherwise) if the specified tag cannot be read.
 
 This patch addresses the following GitHub user issue:
