@@ -3,7 +3,7 @@
 from exif._constants import (
     ATTRIBUTE_ID_MAP, ATTRIBUTE_NAME_MAP, BYTES_PER_IFD_TAG_COUNT, BYTES_PER_IFD_TAG_ID,
     BYTES_PER_IFD_TAG_TYPE, BYTES_PER_IFD_TAG_VALUE_OFFSET, BYTES_PER_IFD_TAG_TOTAL,
-    ERROR_IMG_NO_ATTR, ExifTypes, USER_COMMENT_CHARACTER_CODE_LEN_BYTES)
+    ERROR_IMG_NO_ATTR, ExifMarkers, ExifTypes, HEX_PER_BYTE, USER_COMMENT_CHARACTER_CODE_LEN_BYTES)
 from exif._hex_interface import HexInterface
 
 from exif._ifd_tag._ascii import Ascii
@@ -147,8 +147,6 @@ class App1MetaData:
 
     def _parse_ifd_segments(self):
         cursor = 0xA
-        exif_offset = None
-        gps_offset = None
 
         # Read the endianness specified by the image.
         self._segment_hex.set_endianness(self._segment_hex.read(cursor, 2))
@@ -167,6 +165,16 @@ class App1MetaData:
             cursor = self._unpack_ifd_tags(cursor)
             next_offset_str = self._segment_hex.read(cursor, 4)
 
+            if current_ifd == 1:  # IFD segment 1 contains thumbnail (if present)
+                succeeding_hex_string = self._segment_hex.get_hex_string()[cursor * HEX_PER_BYTE:]
+                try:
+                    start_index = succeeding_hex_string.index(ExifMarkers.SOI)
+                    end_index = succeeding_hex_string.index(ExifMarkers.EOI) + len(ExifMarkers.EOI)
+                except ValueError:
+                    pass  # no thumbnail
+                else:
+                    self.thumbnail_hex_string = succeeding_hex_string[start_index:end_index]
+
             try:
                 next_offset_int = int(next_offset_str, 16)
             except ValueError:
@@ -179,6 +187,7 @@ class App1MetaData:
     def __init__(self, segment_hex):
         self._segment_hex = HexInterface(segment_hex)
         self.ifd_tags = {}
+        self.thumbnail_hex_string = None
 
         self._parse_ifd_segments()
 
