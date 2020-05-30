@@ -2,6 +2,21 @@
 Release Notes
 #############
 
+*************************************************
+[0.9.0] Add ``delete_all()`` method. (2020-05-29)
+*************************************************
+
+Add a new method called ``remove_all()`` that deletes all known EXIF tags in an
+``Image`` object.
+
+This minor release addresses the following GItHub user issue:
+
+* Removing all known EXIF values. (https://github.com/TNThieding/exif/issues/29)
+
+This patch contains changes submitted via GitHub pull request by the following user:
+
+* ArgiesDario
+
 ****************************************************
 [0.8.5] Fix ``exif_version`` attribute. (2020-05-18)
 ****************************************************
@@ -22,6 +37,10 @@ This patch addresses the following GitHub and GitLab user issues:
 
 * Broken Python 3.5 compatibility with Release 0.8.3. (https://gitlab.com/TNThieding/exif/-/issues/21)
 * Dependency on enum34 makes it impossible to build a conda package. (https://github.com/TNThieding/exif/issues/25)
+
+This patch contains changes submitted via GitHub pull request by the following user:
+
+* RKrahl
 
 ***************************************************
 [0.8.3] Mid-April 2020 bug fix rollup. (2020-04-20)

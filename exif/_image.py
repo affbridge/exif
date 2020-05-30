@@ -2,6 +2,7 @@
 
 import binascii
 import sys
+import warnings
 
 from exif._constants import ATTRIBUTE_ID_MAP, ExifMarkers, HEX_PER_BYTE
 from exif._app1_metadata import App1MetaData
@@ -109,6 +110,14 @@ class Image:
 
         """
         self.__delattr__(attribute)
+
+    def delete_all(self):
+        """Remove all EXIF tags from the image."""
+        for tag in self._segments['APP1'].get_tag_list():
+            try:
+                self.__delattr__(tag)
+            except AttributeError:
+                warnings.warn("could not delete tag " + tag, RuntimeWarning)
 
     def get(self, attribute, default=None):
         """Return the value of the specified attribute.

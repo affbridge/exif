@@ -6,7 +6,7 @@ import unittest
 
 from exif import Image
 from exif.tests.delete_exif_baselines import (
-    DELETE_ASCII_TAGS_HEX_BASELINE, DELETE_GEOTAG_HEX_BASELINE)
+    DELETE_ALL_HEX_BASELINE, DELETE_ASCII_TAGS_HEX_BASELINE, DELETE_GEOTAG_HEX_BASELINE)
 
 # pylint: disable=pointless-statement, protected-access
 
@@ -22,6 +22,13 @@ class TestModifyExif(unittest.TestCase):
             self.image = Image(image_file)
 
         assert self.image.has_exif
+
+    def test_delete_all_tags(self):
+        """Verify deleting all EXIF tags from the Image object."""
+        self.image.delete_all()
+
+        segment_hex = self.image._segments['APP1'].get_segment_hex()
+        self.assertEqual('\n'.join(textwrap.wrap(segment_hex, 90)), DELETE_ALL_HEX_BASELINE)
 
     def test_delete_ascii_tags(self):
         """Verify deleting EXIF ASCII from the Image object and the hexadecimal equivalent."""
