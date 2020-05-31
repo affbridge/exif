@@ -122,6 +122,31 @@ class Saturation(IntEnum):
     """High Saturation"""
 
 
+class SensingMethod(IntEnum):
+    """Image sensor type on the camera or input device."""
+
+    NOT_DEFINED = 1
+    """Not Defined"""
+
+    ONE_CHIP_COLOR_AREA_SENSOR = 2
+    """One-Chip Color Area Sensor"""
+
+    TWO_CHIP_COLOR_AREA_SENSOR = 3
+    """Two-Chip Color Area Sensor"""
+
+    THREE_CHIP_COLOR_AREA_SENSOR = 4
+    """Three-Chip Color Area Sensor"""
+
+    COLOR_SEQUENTIAL_AREA_SENSOR = 5
+    """Color Sequential Area Sensor"""
+
+    TRILINEAR_SENSOR = 7
+    """Trilinear Sensor"""
+
+    COLOR_SEQUENTIAL_LINEAR_SENSOR = 8
+    """Color Sequential Linear Sensor"""
+
+
 class Sharpness(IntEnum):
     """Sharpness processing applied by camera."""
 

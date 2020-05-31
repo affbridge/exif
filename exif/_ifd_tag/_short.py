@@ -4,8 +4,8 @@ import binascii
 import struct
 
 from exif._constants import (
-    ATTRIBUTE_ID_MAP, ColorSpace, EXIF_LITTLE_ENDIAN_HEADER, Saturation, Sharpness,
-    Orientation)
+    ATTRIBUTE_ID_MAP, ColorSpace, EXIF_LITTLE_ENDIAN_HEADER, Orientation, Saturation, SensingMethod, Sharpness,
+    )
 from exif._ifd_tag._base import Base as BaseIfdTag
 
 
@@ -70,6 +70,8 @@ class Short(BaseIfdTag):
             retval = Orientation(read_number)
         elif self.tag == ATTRIBUTE_ID_MAP["saturation"]:
             retval = Saturation(read_number)
+        elif self.tag == ATTRIBUTE_ID_MAP["sensing_method"]:
+            retval = SensingMethod(read_number)
         elif self.tag == ATTRIBUTE_ID_MAP["sharpness"]:
             retval = Sharpness(read_number)
         else:

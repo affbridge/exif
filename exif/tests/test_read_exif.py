@@ -52,6 +52,7 @@ def rounded_str(input_object):
 
 read_attributes = [
     ("brightness_value", rounded_str, "11.3644957983"),
+    ("color_space", repr, "<ColorSpace.UNCALIBRATED: 65535>"),
     ("datetime", str, "2018:03:12 10:12:07"),
     ("exif_version", str, "0221"),
     ("gps_altitude", rounded_str, "2189.98969072"),
@@ -65,6 +66,8 @@ read_attributes = [
     ("make", str, "Apple"),
     ("metering_mode", str, "5"),
     ("model", str, "iPhone 7"),
+    ("orientation", repr, "<Orientation.TOP_LEFT: 1>"),
+    ("sensing_method", repr, "<SensingMethod.ONE_CHIP_COLOR_AREA_SENSOR: 2>"),
     ("x_resolution", str, "72.0"),
     ("y_resolution", str, "72.0"),
 ]

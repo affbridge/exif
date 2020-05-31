@@ -45,6 +45,12 @@ Saturation
 .. autoclass:: exif.Saturation
     :members:
 
+SensingMethod
+=============
+
+.. autoclass:: exif.SensingMethod
+    :members:
+
 Sharpness
 =========
 
@@ -118,7 +124,7 @@ The ``exif.Image`` interface provides access to the following EXIF tags as Pytho
 - gps_longitude
 - gps_longitude_ref
 - gps_map_datum
-- gps_measur_emode
+- gps_measure_mode
 - gps_processing_method
 - gps_satellites
 - gps_speed
@@ -195,5 +201,10 @@ The ``exif.Image`` interface provides access to the following EXIF tags as Pytho
 - white_balance
 - white_point
 - x_resolution
+- xp_author
+- xp_comment
+- xp_keywords
+- xp_subject
+- xp_title
 - y_and_c_positioning
 - y_resolution
