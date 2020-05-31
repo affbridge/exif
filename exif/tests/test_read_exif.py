@@ -50,7 +50,7 @@ def rounded_str(input_object):
     return str(input_object)[:13]
 
 
-read_attributes = [
+read_attributes_grand_canyon = [
     ("brightness_value", rounded_str, "11.3644957983"),
     ("color_space", repr, "<ColorSpace.UNCALIBRATED: 65535>"),
     ("datetime", str, "2018:03:12 10:12:07"),
@@ -67,16 +67,41 @@ read_attributes = [
     ("metering_mode", str, "5"),
     ("model", str, "iPhone 7"),
     ("orientation", repr, "<Orientation.TOP_LEFT: 1>"),
+    ("scene_capture_type", repr, "<SceneCaptureType.STANDARD: 0>"),
     ("sensing_method", repr, "<SensingMethod.ONE_CHIP_COLOR_AREA_SENSOR: 2>"),
     ("x_resolution", str, "72.0"),
     ("y_resolution", str, "72.0"),
 ]
 
 
-@pytest.mark.parametrize("attribute, func, value", read_attributes, ids=[params[0] for params in read_attributes])
-def test_read(attribute, func, value):
+# pylint: disable=line-too-long
+@pytest.mark.parametrize("attribute, func, value", read_attributes_grand_canyon, ids=[params[0] for params in read_attributes_grand_canyon])
+def test_read_grand_canyon(attribute, func, value):
     """Test reading tags and compare to known baseline values."""
     with open(os.path.join(os.path.dirname(__file__), 'grand_canyon.jpg'), 'rb') as image_file:
+        image = Image(image_file)
+
+    assert func(getattr(image, attribute)) == value
+
+
+read_attributes_grayson_highlands = [
+    ("aperture_value", rounded_str, "1.69599371563"),
+    ("brightness_value", rounded_str, "10.8686679174"),
+    ("datetime_original", str, "2018:07:19 14:45:42"),
+    ("exif_version", str, "0221"),
+    ("exposure_mode", repr, "<ExposureMode.AUTO_EXPOSURE: 0>"),
+    ("exposure_program", repr, "<ExposureProgram.NORMAL_PROGRAM: 2>"),
+    ("white_balance", repr, "<WhiteBalance.AUTO: 0>"),
+    ("x_resolution", str, "72.0"),
+    ("y_resolution", str, "72.0"),
+]
+
+
+# pylint: disable=line-too-long
+@pytest.mark.parametrize("attribute, func, value", read_attributes_grayson_highlands, ids=[params[0] for params in read_attributes_grayson_highlands])
+def test_read_grayson_highlands(attribute, func, value):
+    """Test reading tags and compare to known baseline values."""
+    with open(os.path.join(os.path.dirname(__file__), 'grayson_highlands.jpg'), 'rb') as image_file:
         image = Image(image_file)
 
     assert func(getattr(image, attribute)) == value

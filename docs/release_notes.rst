@@ -8,7 +8,11 @@ Release Notes
 
 Add enumerations for the following tags:
 
+* Exposure mode
+* Exposure program
+* Scene capture type
 * Sensing method
+* White balance
 
 **************************************************
 [0.9.0] Add thumbnail image accessor. (2020-05-30)

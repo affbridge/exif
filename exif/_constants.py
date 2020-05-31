@@ -73,6 +73,50 @@ class ExifTypes(IntEnum):
     """Two (Numerator and Denominator) SLONGs"""
 
 
+class ExposureMode(IntEnum):
+    """Exposure mode set when the image was shot."""
+
+    AUTO_EXPOSURE = 0
+    """Auto Exposure"""
+
+    MANUAL_EXPOSURE = 1
+    """Manual Exposure"""
+
+    AUTO_BRACKET = 2
+    """Auto Bracket"""
+
+
+class ExposureProgram(IntEnum):
+    """Class of the program used by the camera to set exposure when the picture is taken."""
+
+    NOT_DEFINED = 0
+    """Not Defined"""
+
+    MANUAL = 1
+    """Manual"""
+
+    NORMAL_PROGRAM = 2
+    """Normal Program"""
+
+    APERTURE_PRIORITY = 3
+    """Aperture Priority"""
+
+    SHUTTER_PRIORITY = 4
+    """Shutter Priority"""
+
+    CREATIVE_PROGRAM = 5
+    """Creative Program (Biased Toward Depth of Field)"""
+
+    ACTION_PROGRAM = 6
+    """Action Program (Biased Toward Fast Shutter Speed)"""
+
+    PORTRAIT_MODE = 7
+    """Portrait Mode (For Closeup Photos with the Background out of Focus)"""
+
+    LANDSCAPE_MODE = 8
+    """Landscape Kode (For Landscape Photos with the Background in Focus)"""
+
+
 class Orientation(IntEnum):
     """Image orientation in terms of rows and columns."""
 
@@ -122,6 +166,22 @@ class Saturation(IntEnum):
     """High Saturation"""
 
 
+class SceneCaptureType(IntEnum):
+    """Type of scene that was shot or the mode in which the image was shot."""
+
+    STANDARD = 0
+    """Standard"""
+
+    LANDSCAPE = 1
+    """Landscape"""
+
+    PORTRAIT = 2
+    """Portrait"""
+
+    NIGHT_SCENE = 2
+    """Night Scene"""
+
+
 class SensingMethod(IntEnum):
     """Image sensor type on the camera or input device."""
 
@@ -158,6 +218,16 @@ class Sharpness(IntEnum):
 
     HARD = 2
     """Hard"""
+
+
+class WhiteBalance(IntEnum):
+    """White balance mode set when the image was shot."""
+
+    AUTO = 0
+    """Auto White Balance"""
+
+    MANUAL = 1
+    """Manual White Balance"""
 
 
 ATTRIBUTE_ID_MAP = {

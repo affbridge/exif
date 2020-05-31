@@ -33,6 +33,20 @@ ColorSpace
 .. autoclass:: exif.ColorSpace
     :members:
 
+ExposureMode
+============
+
+.. autoclass:: exif.ExposureMode
+    :members:
+
+
+ExposureProgram
+===============
+
+.. autoclass:: exif.ExposureProgram
+    :members:
+
+
 Orientation
 ===========
 
@@ -45,6 +59,12 @@ Saturation
 .. autoclass:: exif.Saturation
     :members:
 
+SceneCaptureType
+================
+
+.. autoclass:: exif.SceneCaptureType
+    :members:
+
 SensingMethod
 =============
 
@@ -55,6 +75,12 @@ Sharpness
 =========
 
 .. autoclass:: exif.Sharpness
+    :members:
+
+WhiteBalance
+============
+
+.. autoclass:: exif.WhiteBalance
     :members:
 
 ****************
