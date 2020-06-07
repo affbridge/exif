@@ -40,7 +40,6 @@ ExposureMode
 .. autoclass:: exif.ExposureMode
     :members:
 
-
 ExposureProgram
 ===============
 
@@ -53,11 +52,16 @@ MeteringMode
 .. autoclass:: exif.MeteringMode
     :members:
 
-
 Orientation
 ===========
 
 .. autoclass:: exif.Orientation
+    :members:
+
+ResolutionUnit
+==============
+
+.. autoclass:: exif.ResolutionUnit
     :members:
 
 Saturation

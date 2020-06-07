@@ -9,11 +9,15 @@ Release Notes
 Add a new method called ``delete_all()`` that deletes all known EXIF tags in an
 ``Image`` object.
 
-This minor release addresses the following GItHub user issue:
+Add enumeration for the following tag:
+
+* Resolution unit
+
+This minor release addresses the following GitHub user issue:
 
 * Removing all known EXIF values. (https://github.com/TNThieding/exif/issues/29)
 
-This patch contains changes submitted via GitHub pull request by the following user:
+This minor release contains changes submitted via GitHub pull request by the following user:
 
 * ArgiesDario
 
