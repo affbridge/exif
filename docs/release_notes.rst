@@ -2,11 +2,11 @@
 Release Notes
 #############
 
-*************************************************
-[0.9.0] Add ``delete_all()`` method. (2020-05-30)
-*************************************************
+**************************************************
+[0.11.0] Add ``delete_all()`` method. (2020-06-06)
+**************************************************
 
-Add a new method called ``remove_all()`` that deletes all known EXIF tags in an
+Add a new method called ``delete_all()`` that deletes all known EXIF tags in an
 ``Image`` object.
 
 This minor release addresses the following GItHub user issue:
@@ -16,6 +16,29 @@ This minor release addresses the following GItHub user issue:
 This patch contains changes submitted via GitHub pull request by the following user:
 
 * ArgiesDario
+
+******************************************************
+[0.10.0] Add additional tag enumerations. (2020-05-31)
+******************************************************
+
+Add enumerations for the following tags:
+
+* Exposure mode
+* Exposure program
+* Metering mode
+* Scene capture type
+* Sensing method
+* White balance
+
+**************************************************
+[0.9.0] Add thumbnail image accessor. (2020-05-30)
+**************************************************
+
+Add ``get_thumbnail()`` method to extract bytes representing a thumbnail JPEG.
+
+This patch addresses the following GitHub user issue:
+
+* Extract thumbnail from the EXIF metadata. (https://github.com/TNThieding/exif/issues/28)
 
 *******************************************************************************
 [0.8.6] Make ``get()`` return default value if tag isn't readable. (2020-05-29)

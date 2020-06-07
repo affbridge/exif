@@ -20,6 +20,7 @@ Image
     .. automethod:: exif.Image.delete_all
     .. automethod:: exif.Image.get
     .. automethod:: exif.Image.get_file
+    .. automethod:: exif.Image.get_thumbnail
     .. autoattribute:: exif.Image.has_exif
     .. automethod:: exif.Image.set
 
@@ -33,6 +34,26 @@ ColorSpace
 .. autoclass:: exif.ColorSpace
     :members:
 
+ExposureMode
+============
+
+.. autoclass:: exif.ExposureMode
+    :members:
+
+
+ExposureProgram
+===============
+
+.. autoclass:: exif.ExposureProgram
+    :members:
+
+MeteringMode
+============
+
+.. autoclass:: exif.MeteringMode
+    :members:
+
+
 Orientation
 ===========
 
@@ -45,10 +66,28 @@ Saturation
 .. autoclass:: exif.Saturation
     :members:
 
+SceneCaptureType
+================
+
+.. autoclass:: exif.SceneCaptureType
+    :members:
+
+SensingMethod
+=============
+
+.. autoclass:: exif.SensingMethod
+    :members:
+
 Sharpness
 =========
 
 .. autoclass:: exif.Sharpness
+    :members:
+
+WhiteBalance
+============
+
+.. autoclass:: exif.WhiteBalance
     :members:
 
 ****************
@@ -118,7 +157,7 @@ The ``exif.Image`` interface provides access to the following EXIF tags as Pytho
 - gps_longitude
 - gps_longitude_ref
 - gps_map_datum
-- gps_measur_emode
+- gps_measure_mode
 - gps_processing_method
 - gps_satellites
 - gps_speed
@@ -195,5 +234,10 @@ The ``exif.Image`` interface provides access to the following EXIF tags as Pytho
 - white_balance
 - white_point
 - x_resolution
+- xp_author
+- xp_comment
+- xp_keywords
+- xp_subject
+- xp_title
 - y_and_c_positioning
 - y_resolution
