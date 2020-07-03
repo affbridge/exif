@@ -1,7 +1,7 @@
 """APP1 metadata interface module for EXIF tags."""
 
 from exif._constants import (
-    ATTRIBUTE_ID_MAP, ATTRIBUTE_NAME_MAP, BYTES_PER_IFD_TAG_COUNT, BYTES_PER_IFD_TAG_ID,
+    ATTRIBUTE_ID_MAP, ATTRIBUTE_NAME_MAP, ATTRIBUTE_TYPE_MAP, BYTES_PER_IFD_TAG_COUNT, BYTES_PER_IFD_TAG_ID,
     BYTES_PER_IFD_TAG_TYPE, BYTES_PER_IFD_TAG_VALUE_OFFSET, BYTES_PER_IFD_TAG_TOTAL,
     ERROR_IMG_NO_ATTR, ExifMarkers, ExifTypes, HEX_PER_BYTE, USER_COMMENT_CHARACTER_CODE_LEN_BYTES)
 from exif._hex_interface import HexInterface
@@ -16,6 +16,11 @@ from exif._ifd_tag._short import Short
 from exif._ifd_tag._slong import Slong
 from exif._ifd_tag._srational import Srational
 from exif._ifd_tag._windows_xp import WindowsXp
+
+# TODO: Add a test since ASCII datetime is good in its current form!
+# TODO: Then, this needs some serious refactoring and cleanup... see other TODOs!
+# TODO: Once a good framework is in place, add other ASCII (and eventually other types) to add framework.
+# TODO: At end, update release notes and version and usage guide
 
 
 class App1MetaData:
@@ -184,6 +189,132 @@ class App1MetaData:
             cursor = 0xA + next_offset_int
             current_ifd += 1
 
+    def _find_ifd(self, ifd_number):
+        cursor = 0xA + 4  # start plus 4 additional bytes for endianness (already set) and "EXIF" string
+
+        # Determine the location of the first IFD section relative to the start of the APP1 section.
+        # 0xA is IFD section offset from start of APP1.
+        cursor = 0xA + int(self._segment_hex.read(cursor, 4), 16)
+
+        current_ifd = 0
+
+        target_ifd_offset = None
+        last_ifd_offset = cursor
+        exif_pointer = None
+        gps_pointer = None
+        while cursor != 0xA:
+            if current_ifd == ifd_number:
+                target_ifd_offset = cursor
+
+            initial_cursor_position = cursor
+
+            num_ifd_tags = int(self._segment_hex.read(cursor, 2), 16)
+            cursor += 2
+
+            for tag_index in range(num_ifd_tags):  # pylint: disable=unused-variable
+                tag_id = self._segment_hex.read(cursor, BYTES_PER_IFD_TAG_ID)
+                cursor += BYTES_PER_IFD_TAG_ID
+                tag_type = int(self._segment_hex.read(cursor, BYTES_PER_IFD_TAG_TYPE), 16)
+                cursor += BYTES_PER_IFD_TAG_TYPE
+                tag_count = self._segment_hex.read(cursor, BYTES_PER_IFD_TAG_COUNT)
+                cursor += BYTES_PER_IFD_TAG_COUNT
+                tag_value_offset = self._segment_hex.read(cursor, BYTES_PER_IFD_TAG_VALUE_OFFSET)
+                tag_value_offset_addr = cursor
+                cursor += BYTES_PER_IFD_TAG_VALUE_OFFSET
+
+                tag = self._tag_factory(tag_id, tag_type, tag_count, tag_value_offset,
+                                        initial_cursor_position, tag_value_offset_addr)
+
+                if tag.is_exif_pointer():
+                    exif_pointer = 0xA + tag.value_offset
+
+                if tag.is_gps_pointer():
+                    gps_pointer = 0xA + tag.value_offset
+
+            next_offset_str = self._segment_hex.read(cursor, 4)
+
+            try:
+                next_offset_int = int(next_offset_str, 16)
+            except ValueError:
+                # Handle case of invalid literal for int() with base 16: ''
+                next_offset_int = 0
+
+            last_ifd_offset = cursor + 4  # so that tag values can be added after the IFDs
+            cursor = 0xA + next_offset_int
+            current_ifd += 1
+
+        # Find the maximal final IFD termination offset.
+        if exif_pointer:
+            exif_ifd_end = 2 + BYTES_PER_IFD_TAG_TYPE * int(self._segment_hex.read(exif_pointer, 2), 16)
+            last_ifd_offset = max(last_ifd_offset, exif_ifd_end)
+        if gps_pointer:
+            gps_ifd_end = 2 + BYTES_PER_IFD_TAG_TYPE * int(self._segment_hex.read(gps_pointer, 2), 16)
+            last_ifd_offset = max(last_ifd_offset, gps_ifd_end)
+
+        if not target_ifd_offset:
+            if ifd_number == "exif" and exif_pointer:
+                target_ifd_offset = exif_pointer
+            elif ifd_number == "gps" and gps_pointer:
+                target_ifd_offset = gps_pointer
+            else:
+                raise RuntimeError("could not find IFD segment {0} in image".format(ifd_number))
+
+        return target_ifd_offset, last_ifd_offset
+
+    def _add_tag(self, tag, value):
+        try:
+            tag_type, ifd_number = ATTRIBUTE_TYPE_MAP[tag]
+        except KeyError:
+            raise AttributeError("cannot add attribute {0} to image".format(tag))
+
+        cursor, last_ifd_offset = self._find_ifd(ifd_number)
+
+        # Increment the tag count in the current IFD segment.
+        num_ifd_tags = int(self._segment_hex.read(cursor, 2), 16)
+        num_ifd_tags += 1
+        self._segment_hex.modify_number(cursor, 2, num_ifd_tags)
+        cursor += 2 + BYTES_PER_IFD_TAG_TOTAL * (num_ifd_tags - 1)  # skip to space for next tag
+
+        # If necessary, find space for new tag and derive pointer.
+        value_cursor = last_ifd_offset + 120  # TODO: Something better than 120 to fit future tags? What do other EXIF tools do?
+        if tag_type == ExifTypes.ASCII:
+            necessary_bytes = len(value) + 1
+        else:
+            raise RuntimeError  # TODO: Better error handling.
+
+        value_offset = None
+        while not value_offset:
+            if self._segment_hex.read(value_cursor, necessary_bytes) == "00" * necessary_bytes:  # TODO: Abstract is empty for hex?
+                value_offset = value_cursor
+
+            value_cursor += 1
+
+        value_write_cursor = value_offset
+        print(value_offset)  # TODO RM
+        for character in value:  # last allocated byte remains null character
+            self._segment_hex.modify_hex(value_write_cursor, hex(ord(character)).lstrip('0x'))
+            value_write_cursor += 1
+
+        # Add IFD tag bytes.
+        # TODO: Clean up with a "pack" method?
+        assert self._segment_hex.read(cursor, BYTES_PER_IFD_TAG_TOTAL) == "000000000000000000000000"
+        tag_base = cursor
+        self._segment_hex.modify_number(cursor, BYTES_PER_IFD_TAG_ID, ATTRIBUTE_ID_MAP[tag])
+        cursor += BYTES_PER_IFD_TAG_ID
+        self._segment_hex.modify_number(cursor, BYTES_PER_IFD_TAG_TYPE, tag_type)
+        cursor += BYTES_PER_IFD_TAG_TYPE
+        if tag_type == ExifTypes.ASCII:
+            self._segment_hex.modify_number(cursor, BYTES_PER_IFD_TAG_COUNT, len(value) + 1)  # add one for null term.
+            cursor += BYTES_PER_IFD_TAG_COUNT
+            self._segment_hex.modify_number(cursor, BYTES_PER_IFD_TAG_VALUE_OFFSET, value_offset - 0xA)  # TODO: Document this
+            cursor += BYTES_PER_IFD_TAG_VALUE_OFFSET
+        else:
+            raise RuntimeError  # TODO: Better error handling.
+
+        print(self._segment_hex.read(tag_base, BYTES_PER_IFD_TAG_TOTAL))  #TODO:RM
+
+        # TODO: Add tag accessor in Python? (Or re-load image?)
+
     def __init__(self, segment_hex):
         self._segment_hex = HexInterface(segment_hex)
         self.ifd_tags = {}
@@ -233,6 +364,7 @@ class App1MetaData:
             try:
                 ifd_tag = self.ifd_tags[attribute_id]
             except KeyError:
-                raise AttributeError(ERROR_IMG_NO_ATTR.format(key))
-
-            ifd_tag.modify(value)
+                # Tag is not in image already.
+                self._add_tag(key, value)
+            else:
+                ifd_tag.modify(value)

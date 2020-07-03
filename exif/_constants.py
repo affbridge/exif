@@ -428,6 +428,11 @@ ATTRIBUTE_ID_MAP = {
 
 ATTRIBUTE_NAME_MAP = {value: key for key, value in ATTRIBUTE_ID_MAP.items()}
 
+ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description
+    "datetime_digitized": (ExifTypes.ASCII, "exif"),
+    "datetime_original": (ExifTypes.ASCII, "exif"),
+}
+
 BYTES_PER_IFD_TAG_ID = 2
 
 BYTES_PER_IFD_TAG_TYPE = 2
