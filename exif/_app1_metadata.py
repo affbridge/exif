@@ -283,14 +283,14 @@ class App1MetaData:
             raise RuntimeError  # TODO: Better error handling.
 
         value_offset = None
+        # Look one byte prior to avoid stepping on the toes of another tag's null termination character.
         while not value_offset:
-            if self._segment_hex.read(value_cursor, necessary_bytes) == "00" * necessary_bytes:  # TODO: Abstract is empty for hex?
+            if self._segment_hex.read(value_cursor - 1, necessary_bytes + 1) == "00" * (necessary_bytes + 1):  # TODO: Abstract is empty for hex?
                 value_offset = value_cursor
 
             value_cursor += 1
 
         value_write_cursor = value_offset
-        print(value_offset)  # TODO RM
         for character in value:  # last allocated byte remains null character
             self._segment_hex.modify_hex(value_write_cursor, hex(ord(character)).lstrip('0x'))
             value_write_cursor += 1
@@ -311,9 +311,7 @@ class App1MetaData:
         else:
             raise RuntimeError  # TODO: Better error handling.
 
-        print(self._segment_hex.read(tag_base, BYTES_PER_IFD_TAG_TOTAL))  #TODO:RM
-
-        # TODO: Add tag accessor in Python? (Or re-load image?)
+        self._parse_ifd_segments()  # re-parse from image hex
 
     def __init__(self, segment_hex):
         self._segment_hex = HexInterface(segment_hex)
