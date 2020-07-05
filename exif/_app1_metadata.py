@@ -34,7 +34,7 @@ class App1MetaData:
             raise RuntimeError("destination IFD ({0}) does not have space for an additional tag".format(ifd_number))
 
         tags = list(orig_ifd.tags)
-        tags.append(ifd_tag_cls(  # TODO: Find a valid value offset if a pointer type!
+        tags.append(ifd_tag_cls(  # FUTURE: Find a valid value offset if a pointer type!
             tag_id=ATTRIBUTE_ID_MAP[tag], type=tag_type, value_count=1, value_offset=0))  # value set later
 
         # Pack in new IFD bytes. (Note: The pack_into method overrides the pre-existing bytes.)
