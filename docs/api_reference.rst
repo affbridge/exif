@@ -24,6 +24,20 @@ Image
     .. autoattribute:: exif.Image.has_exif
     .. automethod:: exif.Image.set
 
+**********
+Data Types
+**********
+
+.. note:: All data types are constructed using the `plum (pack/unpack memory)
+          package <https://plum-py.readthedocs.io/en/latest/index.html>`_.
+
+Flash
+=====
+
+.. autoclass:: exif.Flash
+.. autoclass:: exif.FlashMode
+.. autoclass:: exif.FlashReturn
+
 ************
 Enumerations
 ************

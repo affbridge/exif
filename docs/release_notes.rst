@@ -10,8 +10,9 @@ Support adding the following tag types:
 
 * SHORT (except for TIFF attributes)
 
-Add enumerations for the following tags:
+Add data types and enumerations for the following tags:
 
+* Flash
 * Light source
 
 This release also addresses the following anomalous behavior:
