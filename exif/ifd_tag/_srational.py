@@ -3,7 +3,7 @@
 from fractions import Fraction
 
 from plum.int.big import SInt32
-from plum.int.little import SInt32 as SInt32_L
+from plum.int.little import SInt32 as SInt32Le
 from plum.structure import Member, Structure
 
 from exif._datatypes import TiffByteOrder
@@ -11,13 +11,19 @@ from exif.ifd_tag._base import Base as BaseIfdTag
 
 
 class SrationalDtype(Structure):
+
+    """SRATIONAL Datatype"""
+
     numerator: int = Member(cls=SInt32)
     denominator: int = Member(cls=SInt32)
 
 
-class SrationalDtype_L(Structure):
-    numerator: int = Member(cls=SInt32_L)
-    denominator: int = Member(cls=SInt32_L)
+class SrationalDtypeLe(Structure):
+
+    """SRATIONAL Datatype (Little Endian)"""
+
+    numerator: int = Member(cls=SInt32Le)
+    denominator: int = Member(cls=SInt32Le)
 
 
 class Srational(BaseIfdTag):
@@ -30,7 +36,7 @@ class Srational(BaseIfdTag):
         if self._app1_ref.endianness == TiffByteOrder.BIG:
             self.srational_dtype_cls = SrationalDtype
         else:
-            self.srational_dtype_cls = SrationalDtype_L
+            self.srational_dtype_cls = SrationalDtypeLe
 
     def modify(self, value):
         """Modify tag value.

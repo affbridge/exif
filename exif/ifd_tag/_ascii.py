@@ -10,7 +10,8 @@ from exif.ifd_tag._base import Base as BaseIfdTag
 
 
 class IntraIfdAsciiStr(Str, encoding="ascii", nbytes=4):
-    pass
+
+    """ASCII string data that fits within an IFD tag."""
 
 
 class Ascii(BaseIfdTag):
@@ -41,7 +42,8 @@ class Ascii(BaseIfdTag):
         else:  # existing ASCII value offset is a pointer
 
             class IfdTagStrTarget(Str, encoding="ascii", zero_termination=True, nbytes=self.tag_view.value_count):
-                pass
+
+                """Target string datatype class sized to IFD tag's specification."""
 
             if len(value) < 4:  # put into IFD tag instead
                 # Wipe existing value at pointer-specified offset.

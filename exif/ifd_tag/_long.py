@@ -1,7 +1,5 @@
 """IFD LONG tag structure parser module."""
 
-import struct
-
 from exif.ifd_tag._base import Base as BaseIfdTag
 
 

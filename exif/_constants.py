@@ -38,7 +38,7 @@ class ExifMarkers:
     DRI = SEG_PREFIX + b"\xdd"
     """Restart Interoperability Definition"""
 
-    SOF =SEG_PREFIX + b"\xc0"
+    SOF = SEG_PREFIX + b"\xc0"
     """Start of Frame"""
 
     SOS = SEG_PREFIX + b"\xda"

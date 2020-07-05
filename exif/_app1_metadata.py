@@ -3,7 +3,7 @@
 from plum import unpack_from
 
 from exif._constants import ATTRIBUTE_ID_MAP, ATTRIBUTE_NAME_MAP, ERROR_IMG_NO_ATTR, ExifMarkers
-from exif._datatypes import ExifType, ExifType_L, Ifd, Ifd_L, IfdTag, TiffByteOrder, TiffHeader
+from exif._datatypes import ExifType, ExifTypeLe, Ifd, IfdLe, IfdTag, TiffByteOrder, TiffHeader
 
 from exif.ifd_tag import (
     Ascii, BaseIfdTag, Byte, ExifVersion, Long, Rational, Short, Slong, Srational, UserComment, WindowsXp)
@@ -22,7 +22,7 @@ class App1MetaData:
         if self.endianness == TiffByteOrder.BIG:
             ifd_cls = Ifd
         else:
-            ifd_cls = Ifd_L
+            ifd_cls = IfdLe
         orig_ifd = unpack_from(ifd_cls, self.body_bytes, offset=corresponding_ifd_offset)
 
         # Construct a new IFD section datatype containing all tags but the deletion target.
@@ -71,44 +71,13 @@ class App1MetaData:
         return [ATTRIBUTE_NAME_MAP.get(key, "<unknown EXIF tag {0}>".format(key))
                 for key in self.ifd_tags]
 
-    def _tag_factory(self, tag_t, offset):
-        if self.endianness == TiffByteOrder.BIG:
-            exif_type_cls = ExifType
-        else:
-            exif_type_cls = ExifType_L
-
-        if ATTRIBUTE_ID_MAP["xp_title"] <= tag_t.tag_id <= ATTRIBUTE_ID_MAP["xp_subject"]:  # legacy Windows XP tags
-            cls = WindowsXp
-        elif ATTRIBUTE_ID_MAP["exif_version"] == tag_t.tag_id:  # custom ASCII encoding without termination character
-            cls = ExifVersion
-        elif ATTRIBUTE_ID_MAP["user_comment"] == tag_t.tag_id:
-            cls = UserComment
-        elif tag_t.type == exif_type_cls.BYTE:
-            cls = Byte
-        elif tag_t.type == exif_type_cls.ASCII:
-            cls = Ascii
-        elif tag_t.type == exif_type_cls.SHORT:
-            cls = Short
-        elif tag_t.type == exif_type_cls.LONG:
-            cls = Long
-        elif tag_t.type == exif_type_cls.RATIONAL:
-            cls = Rational
-        elif tag_t.type == exif_type_cls.SLONG:
-            cls = Slong
-        elif tag_t.type == exif_type_cls.SRATIONAL:
-            cls = Srational
-        else:
-            cls = BaseIfdTag
-
-        return cls(offset, self)
-
     def _iter_ifd_tags(self, ifd_key):
         ifd_offset = self.ifd_pointers[ifd_key]
 
         if self.endianness == TiffByteOrder.BIG:
             ifd_t = unpack_from(Ifd, self.body_bytes, offset=ifd_offset)
         else:
-            ifd_t = unpack_from(Ifd_L, self.body_bytes, offset=ifd_offset)
+            ifd_t = unpack_from(IfdLe, self.body_bytes, offset=ifd_offset)
 
         for tag_index in range(ifd_t.count):
             tag_offset = ifd_offset + 2 + tag_index * IfdTag.nbytes  # count is 2 bytes
@@ -143,6 +112,37 @@ class App1MetaData:
 
         if "gps" in self.ifd_pointers:
             self._iter_ifd_tags("gps")
+
+    def _tag_factory(self, tag_t, offset):  # pylint: disable=too-many-branches
+        if self.endianness == TiffByteOrder.BIG:
+            exif_type_cls = ExifType
+        else:
+            exif_type_cls = ExifTypeLe
+
+        if ATTRIBUTE_ID_MAP["xp_title"] <= tag_t.tag_id <= ATTRIBUTE_ID_MAP["xp_subject"]:  # legacy Windows XP tags
+            cls = WindowsXp
+        elif ATTRIBUTE_ID_MAP["exif_version"] == tag_t.tag_id:  # custom ASCII encoding without termination character
+            cls = ExifVersion
+        elif ATTRIBUTE_ID_MAP["user_comment"] == tag_t.tag_id:
+            cls = UserComment
+        elif tag_t.type == exif_type_cls.BYTE:
+            cls = Byte
+        elif tag_t.type == exif_type_cls.ASCII:
+            cls = Ascii
+        elif tag_t.type == exif_type_cls.SHORT:
+            cls = Short
+        elif tag_t.type == exif_type_cls.LONG:
+            cls = Long
+        elif tag_t.type == exif_type_cls.RATIONAL:
+            cls = Rational
+        elif tag_t.type == exif_type_cls.SLONG:
+            cls = Slong
+        elif tag_t.type == exif_type_cls.SRATIONAL:
+            cls = Srational
+        else:
+            cls = BaseIfdTag
+
+        return cls(offset, self)
 
     def __init__(self, segment_bytes):
         self.header_bytes = bytearray(segment_bytes[:0xA])

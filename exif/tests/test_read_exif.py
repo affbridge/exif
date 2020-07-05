@@ -47,6 +47,13 @@ def test_index_accessor():
 
 
 def rounded_str(input_object):
+    """Trim string for consistency across test environments.
+
+    :param Object input_object: input value
+    :returns: rounded string
+    :rtype: str
+
+    """
     return str(input_object)[:13]
 
 

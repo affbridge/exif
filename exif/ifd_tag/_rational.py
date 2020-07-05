@@ -3,7 +3,7 @@
 from fractions import Fraction
 
 from plum.int.big import UInt32
-from plum.int.little import UInt32 as UInt32_L
+from plum.int.little import UInt32 as UInt32Le
 from plum.structure import Member, Structure
 
 from exif._datatypes import TiffByteOrder
@@ -11,13 +11,19 @@ from exif.ifd_tag._base import Base as BaseIfdTag
 
 
 class RationalDtype(Structure):
+
+    """RATIONAL Datatype"""
+
     numerator: int = Member(cls=UInt32)
     denominator: int = Member(cls=UInt32)
 
 
-class RationalDtype_L(Structure):
-    numerator: int = Member(cls=UInt32_L)
-    denominator: int = Member(cls=UInt32_L)
+class RationalDtypeLe(Structure):
+
+    """RATIONAL Datatype (Little Endian)"""
+
+    numerator: int = Member(cls=UInt32Le)
+    denominator: int = Member(cls=UInt32Le)
 
 
 class Rational(BaseIfdTag):
@@ -30,7 +36,7 @@ class Rational(BaseIfdTag):
         if self._app1_ref.endianness == TiffByteOrder.BIG:
             self.rational_dtype_cls = RationalDtype
         else:
-            self.rational_dtype_cls = RationalDtype_L
+            self.rational_dtype_cls = RationalDtypeLe
 
     def modify(self, value):
         """Modify tag value.

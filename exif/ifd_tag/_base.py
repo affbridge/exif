@@ -1,6 +1,6 @@
 """Base IFD tag structure parser module."""
 
-from exif._datatypes import IfdTag, IfdTag_L, TiffByteOrder
+from exif._datatypes import IfdTag, IfdTagLe, TiffByteOrder
 
 
 class Base:
@@ -14,7 +14,7 @@ class Base:
         if self._app1_ref.endianness == TiffByteOrder.BIG:
             self._ifd_tag_cls = IfdTag
         else:
-            self._ifd_tag_cls = IfdTag_L
+            self._ifd_tag_cls = IfdTagLe
 
         self.tag_view = self._ifd_tag_cls.view(self._app1_ref.body_bytes, self._tag_offset)
 
@@ -41,4 +41,3 @@ class Base:
 
     def wipe(self):  # pragma: no cover
         """Wipe value pointer target bytes to null."""
-        pass

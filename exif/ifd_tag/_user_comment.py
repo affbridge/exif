@@ -12,9 +12,6 @@ class UserComment(BaseIfdTag):
 
     """IFD ASCII tag structure parser class."""
 
-    def __init__(self, tag_offset, app1_ref):
-        super().__init__(tag_offset, app1_ref)
-
     def modify(self, value):
         """Modify tag value.
 
@@ -27,7 +24,8 @@ class UserComment(BaseIfdTag):
 
         class IfdTagStrTarget(Str, encoding="ascii", zero_termination=True,
                               nbytes=self.tag_view.value_count - USER_COMMENT_CHARACTER_CODE_LEN_BYTES):
-            pass
+
+            """Target string datatype class sized to IFD tag's specification."""
 
         ascii_str_bytes = IfdTagStrTarget(value).pack()
         ascii_replace_start_index = self.tag_view.value_offset.get() + USER_COMMENT_CHARACTER_CODE_LEN_BYTES
@@ -51,5 +49,5 @@ class UserComment(BaseIfdTag):
         string_value_offset = self.tag_view.value_offset.get() + USER_COMMENT_CHARACTER_CODE_LEN_BYTES
         string_len = self.tag_view.value_count.get() - USER_COMMENT_CHARACTER_CODE_LEN_BYTES
 
-        value_bytes, _ = getbytes(self._app1_ref.body_bytes, string_value_offset,nbytes=string_len)
+        value_bytes, _ = getbytes(self._app1_ref.body_bytes, string_value_offset, nbytes=string_len)
         return AsciiStr.unpack(value_bytes)
