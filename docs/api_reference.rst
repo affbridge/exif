@@ -46,6 +46,12 @@ ExposureProgram
 .. autoclass:: exif.ExposureProgram
     :members:
 
+LightSource
+===========
+
+.. autoclass:: exif.LightSource
+    :members:
+
 MeteringMode
 ============
 

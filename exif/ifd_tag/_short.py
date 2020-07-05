@@ -4,8 +4,8 @@ from plum.int.big import UInt16
 from plum.int.little import UInt16 as UInt16_L
 
 from exif._constants import (
-    ATTRIBUTE_ID_MAP, ColorSpace, ExposureMode, ExposureProgram, MeteringMode, Orientation, ResolutionUnit, Saturation,
-    SceneCaptureType, SensingMethod, Sharpness, WhiteBalance)
+    ATTRIBUTE_ID_MAP, ColorSpace, ExposureMode, ExposureProgram, LightSource, MeteringMode, Orientation, ResolutionUnit,
+    Saturation, SceneCaptureType, SensingMethod, Sharpness, WhiteBalance)
 from exif._datatypes import TiffByteOrder
 from exif.ifd_tag._base import Base as BaseIfdTag
 
@@ -19,6 +19,7 @@ class Short(BaseIfdTag):
         ATTRIBUTE_ID_MAP["exposure_mode"]: ExposureMode,
         ATTRIBUTE_ID_MAP["exposure_program"]: ExposureProgram,
         ATTRIBUTE_ID_MAP["metering_mode"]: MeteringMode,
+        ATTRIBUTE_ID_MAP["light_source"]: LightSource,
         ATTRIBUTE_ID_MAP["orientation"]: Orientation,
         ATTRIBUTE_ID_MAP["resolution_unit"]: ResolutionUnit,
         ATTRIBUTE_ID_MAP["saturation"]: Saturation,
