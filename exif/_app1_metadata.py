@@ -20,28 +20,109 @@ class App1MetaData:
             raise AttributeError("cannot add attribute {0} to image".format(tag))
 
         if self.endianness == TiffByteOrder.BIG:
+            exif_type_cls = ExifType
             ifd_cls = Ifd
             ifd_tag_cls = IfdTag
         else:
+            exif_type_cls = ExifTypeLe
             ifd_cls = IfdLe
             ifd_tag_cls = IfdTagLe
 
+        # Keep all bytes prior to the IFD where the new tag will be added.
+        new_app1_bytes = self.body_bytes[:self.ifd_pointers[ifd_number]]
+
+        # TODO: Formalize adjusting the next field for IFD 0 too. This is a temporary patch here.
+        ifd_zero = unpack_from(ifd_cls, new_app1_bytes, offset=self.ifd_pointers[0])
+        ifd_zero.next += ifd_tag_cls.nbytes
+        for tag_index in range(ifd_zero.count):
+            tag_t = ifd_zero.tags[tag_index]
+            if tag_t.tag_id == ATTRIBUTE_ID_MAP["_gps_ifd_pointer"]:  # todo: add analysis for when and when not to check GPS and EXIF TOO!!! DON'T FORGET EXIF!
+                # TODO: interop. IFD pointer too? might need to add throughout package!
+                tag_t.value_offset += ifd_tag_cls.nbytes
+            ifd_zero.tags[tag_index] = tag_t
+        # TODO: The temporary shifting of the GPS and EXIF pointers is also in desperate need of touch up!
+        ifd_zero.pack_into(new_app1_bytes, offset=self.ifd_pointers[0])
+
+        # Make a list of all IFDs that will need to be re-packed with touched up pointers.
+        subsequent_ifd_offsets = sorted([offset for offset in self.ifd_pointers.values()
+                                         if offset > self.ifd_pointers[ifd_number]])
+
+        # Unpack the original bytes of the IFD to which the new tag will be added to.
         target_ifd_offset = self.ifd_pointers[ifd_number]
-        orig_ifd = unpack_from(ifd_cls, self.body_bytes, offset=target_ifd_offset)
+        target_ifd = unpack_from(ifd_cls, self.body_bytes, offset=target_ifd_offset)
 
-        offset_after_ifd = target_ifd_offset + orig_ifd.nbytes
-        if not self.body_bytes[offset_after_ifd:offset_after_ifd + IfdTag.nbytes] == b"\x00" * IfdTag.nbytes:
-            raise RuntimeError("destination IFD ({0}) does not have space for an additional tag".format(ifd_number))
+        if subsequent_ifd_offsets:
+            orig_ifd_values = self.body_bytes[target_ifd_offset + target_ifd.nbytes:subsequent_ifd_offsets[0]]
+        else:
+            orig_ifd_values = self.body_bytes[target_ifd_offset + target_ifd.nbytes:]
 
-        tags = list(orig_ifd.tags)
-        tags.append(ifd_tag_cls(  # FUTURE: Find a valid value offset if a pointer type!
-            tag_id=ATTRIBUTE_ID_MAP[tag], type=tag_type, value_count=1, value_offset=0))  # value set later
+        # Iterate over the IFD's tags and increase any value offset pointers by the size of an IFD tag.
+        for tag_index in range(target_ifd.count):
+            tag_t = target_ifd.tags[tag_index]
 
-        # Pack in new IFD bytes. (Note: The pack_into method overrides the pre-existing bytes.)
-        new_ifd = ifd_cls(tags=tags, next=orig_ifd.next)
-        new_ifd.pack_into(self.body_bytes, offset=target_ifd_offset)
+            is_value_in_ifd_tag_itself = tag_t.type == exif_type_cls.ASCII and tag_t.value_count <= 4
+            is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.BYTE
+            is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.SHORT
+            is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.LONG
+            is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.SLONG
+
+            if not is_value_in_ifd_tag_itself:
+                tag_t.value_offset += ifd_tag_cls.nbytes
+
+            target_ifd.tags[tag_index] = tag_t
+
+        # Add the new tag to the IFD.
+        # TODO: This currently assumes that the tag value is intra-IFD!  Support adding with values longer than 4 bytes!
+        # TODO: Support different value counts (e.g., ASCII, GPS) too!
+        target_ifd.count += 1
+        target_ifd.tags.append(ifd_tag_cls(
+            tag_id=ATTRIBUTE_ID_MAP[tag], type=tag_type, value_count=1, value_offset=0))
+
+        # If necessary, touch up the pointer to the next IFD.
+        if target_ifd.next:  # TODO: Support adding with values longer than 4 bytes here too!
+            target_ifd.next += ifd_tag_cls.nbytes
+
+        # Pack new IFD bytes into the new body bytes (along with the pre-existing values that follow).
+        print(new_app1_bytes)
+        target_ifd.pack_into(new_app1_bytes, offset=target_ifd_offset)
+        print(new_app1_bytes)
+        new_app1_bytes += orig_ifd_values
+        print(new_app1_bytes)
+
+        while subsequent_ifd_offsets:
+            print(subsequent_ifd_offsets)
+            # TODO: Fix all this duplication
+            current_ifd_offset = subsequent_ifd_offsets.pop(0)
+            target_ifd = unpack_from(ifd_cls, self.body_bytes, offset=current_ifd_offset)
+
+            if subsequent_ifd_offsets:
+                orig_ifd_values = self.body_bytes[current_ifd_offset + target_ifd.nbytes:subsequent_ifd_offsets[0]]
+            else:
+                orig_ifd_values = self.body_bytes[current_ifd_offset + target_ifd.nbytes:]
+                print(orig_ifd_values)
+
+            for tag_index in range(target_ifd.count):
+                tag_t = target_ifd.tags[tag_index]
+
+                is_value_in_ifd_tag_itself = tag_t.type == exif_type_cls.ASCII and tag_t.value_count <= 4
+                is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.BYTE
+                is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.SHORT
+                is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.LONG
+                is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.SLONG
+
+                if not is_value_in_ifd_tag_itself:
+                    tag_t.value_offset += ifd_tag_cls.nbytes
+
+                target_ifd.tags[tag_index] = tag_t
+
+                if target_ifd.next:  # TODO: Support adding with values longer than 4 bytes here too!
+                    target_ifd.next += ifd_tag_cls.nbytes
+
+                target_ifd.pack_into(new_app1_bytes, offset=current_ifd_offset + ifd_tag_cls.nbytes)
+                new_app1_bytes += orig_ifd_values
 
         # Reload to pick up on new bytes arrangement and then modify the currently-zero value.
+        self.body_bytes = new_app1_bytes
         self._parse_ifd_segments()
         self.ifd_tags[ATTRIBUTE_ID_MAP[tag]].modify(value)
 
@@ -111,10 +192,12 @@ class App1MetaData:
         else:
             ifd_t = unpack_from(IfdLe, self.body_bytes, offset=ifd_offset)
 
+        ifd_t.dump()  # TODO RM
+
         for tag_index in range(ifd_t.count):
             tag_offset = ifd_offset + 2 + tag_index * IfdTag.nbytes  # count is 2 bytes
             tag_t = ifd_t.tags[tag_index]
-            tag_py_ins = self._tag_factory(ifd_t.tags[tag_index], tag_offset)
+            tag_py_ins = self._tag_factory(tag_t, tag_offset)
 
             if ifd_key != 1 or tag_t.tag_id not in self.ifd_tags:  # don't let thumbnail tags override base image tags
                 self.ifd_tags[tag_t.tag_id] = tag_py_ins
