@@ -13,19 +13,6 @@ class App1MetaData:
 
     """APP1 metadata interface class for EXIF tags."""
 
-    def db_dump_ifds(self):  # TODO: RM
-        print("IFD 0")
-        unpack_from(Ifd, self.body_bytes, offset=self.ifd_pointers[0]).dump()
-
-        print("IFD EXIF")
-        unpack_from(Ifd, self.body_bytes, offset=self.ifd_pointers["exif"]).dump()
-
-        print("IFD GPS")
-        unpack_from(Ifd, self.body_bytes, offset=self.ifd_pointers["gps"]).dump()
-
-        print("IFD 1")
-        unpack_from(Ifd, self.body_bytes, offset=self.ifd_pointers[1]).dump()
-
     def _add_tag(self, tag, value):
         try:
             tag_type, ifd_number = ATTRIBUTE_TYPE_MAP[tag]
@@ -50,7 +37,8 @@ class App1MetaData:
 
         # TODO: Formalize adjusting the next field for IFD 0 too. This is a temporary patch here.
         ifd_zero = unpack_from(ifd_cls, new_app1_bytes, offset=self.ifd_pointers[0])
-        ifd_zero.next += ifd_tag_cls.nbytes
+        if ifd_zero.next:
+            ifd_zero.next += ifd_tag_cls.nbytes
         for tag_index in range(ifd_zero.count):
             tag_t = ifd_zero.tags[tag_index]
             if tag_t.tag_id == ATTRIBUTE_ID_MAP["_gps_ifd_pointer"]:  # todo: add analysis for when and when not to check GPS and EXIF TOO!!! DON'T FORGET EXIF!
