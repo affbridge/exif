@@ -6,7 +6,7 @@ import textwrap
 import unittest
 
 from exif import Image
-from exif.tests.add_exif_baselines.swap_short import SWAP_SHORT_BASELINE, SWAP_SHORT_LE_BASELINE
+from exif.tests.add_exif_baselines.add_short import ADD_SHORT_BASELINE, ADD_SHORT_LE_BASELINE
 
 # pylint: disable=protected-access
 
@@ -25,17 +25,14 @@ class TestAddExif(unittest.TestCase):
         assert self.image.has_exif
         assert self.image_le.has_exif
 
-    def test_swap_short(self):
-        """Test deleting an existing SHORT tag to make room for a new one."""
-        del self.image.subject_area
-        del self.image.focal_length_in_35mm_film
-
+    def test_add_shorts(self):
+        """Test adding two new SHORT tags to an image."""
         self.image.light_source = 1
-        #self.image.contrast = 0 TODO Restore
+        self.image.contrast = 0
 
         segment_hex = binascii.hexlify(self.image._segments['APP1'].get_segment_bytes()).decode("utf-8").upper()
         self.assertEqual('\n'.join(textwrap.wrap(segment_hex, 90)),
-                         SWAP_SHORT_BASELINE)
+                         ADD_SHORT_BASELINE)
 
     def test_swap_le_short(self):
         """Test deleting an existing SHORT tag to make room for a new one in a little endian image."""
@@ -44,4 +41,4 @@ class TestAddExif(unittest.TestCase):
 
         segment_hex = binascii.hexlify(self.image_le._segments['APP1'].get_segment_bytes()).decode("utf-8").upper()
         self.assertEqual('\n'.join(textwrap.wrap(segment_hex, 90)),
-                         SWAP_SHORT_LE_BASELINE)
+                         ADD_SHORT_LE_BASELINE)
