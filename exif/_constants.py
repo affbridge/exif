@@ -509,6 +509,8 @@ ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description used when 
     "flash": (int(ExifTypes.SHORT), "exif"),
     "focal_length_in_35mm_film": (int(ExifTypes.SHORT), "exif"),
     "focal_plane_resolution_unit": (int(ExifTypes.SHORT), "exif"),
+    "gps_altitude": (int(ExifTypes.RATIONAL), "gps"),
+    "gps_altitude_ref": (int(ExifTypes.BYTE), "gps"),
     "gps_datestamp": (int(ExifTypes.ASCII), "gps"),
     "gps_dest_bearing_ref": (int(ExifTypes.ASCII), "gps"),
     "gps_dest_distance_ref": (int(ExifTypes.ASCII), "gps"),
@@ -516,7 +518,9 @@ ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description used when 
     "gps_dest_longitude_ref": (int(ExifTypes.ASCII), "gps"),
     "gps_differential": (int(ExifTypes.SHORT), "gps"),
     "gps_img_direction_ref": (int(ExifTypes.ASCII), "gps"),
+    "gps_latitude": (int(ExifTypes.RATIONAL), "gps"),
     "gps_latitude_ref": (int(ExifTypes.ASCII), "gps"),
+    "gps_longitude": (int(ExifTypes.RATIONAL), "gps"),
     "gps_longitude_ref": (int(ExifTypes.ASCII), "gps"),
     "gps_map_datum": (int(ExifTypes.ASCII), "gps"),
     "gps_measure_mode": (int(ExifTypes.ASCII), "gps"),
@@ -543,6 +547,10 @@ ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description used when 
     "subject_distance_range": (int(ExifTypes.SHORT), "exif"),
     "subject_location": (int(ExifTypes.SHORT), "exif"),
     "white_balance": (int(ExifTypes.SHORT), "exif"),
+    "_gps_ifd_pointer": (int(ExifTypes.LONG), 0),
+    # TODO: Add table 2 exif tags pg. 25 as shown on page
+    # TODO: Remaining GPS tags
+    # TODO: Add byte, long, rational, slong, and srational
 }
 
 

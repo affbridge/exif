@@ -9,11 +9,63 @@ from exif._constants import ATTRIBUTE_ID_MAP, ATTRIBUTE_NAME_MAP, ATTRIBUTE_TYPE
 from exif._datatypes import ExifType, ExifTypeLe, Ifd, IfdLe, IfdTag, IfdTagLe, TiffByteOrder, TiffHeader
 from exif.ifd_tag import (
     Ascii, BaseIfdTag, Byte, ExifVersion, Long, Rational, Short, Slong, Srational, UserComment, WindowsXp)
+from exif.ifd_tag._rational import RationalDtype
 
 
+# TODO: Add usage guides
 class App1MetaData:
 
     """APP1 metadata interface class for EXIF tags."""
+
+    def _add_empty_ifd(self, ifd):
+        if not ifd == "gps":
+            raise RuntimeError("only can add GPS IFD to image, not {0}".format(ifd))
+
+        if 1 not in self.ifd_pointers:
+            raise RuntimeError("can't yet add to images without a subsequent IFD 1")
+
+        if self.endianness == TiffByteOrder.BIG:
+            exif_type_cls = ExifType
+            ifd_cls = Ifd
+            ifd_tag_cls = IfdTag
+        else:
+            exif_type_cls = ExifTypeLe
+            ifd_cls = IfdLe
+            ifd_tag_cls = IfdTagLe
+
+        new_app1_bytes = self.body_bytes[:self.ifd_pointers[1]]
+        bytes_after_new_ifd = self.body_bytes[self.ifd_pointers[1]:]
+
+        # Inert empty IFD.
+        empty_ifd = Ifd(tags=[], next=0)
+        new_app1_bytes += empty_ifd.pack()
+
+        # Touch up pointer to IFD 1 (which we already know exists).
+        ifd_zero = unpack_from(ifd_cls, new_app1_bytes, offset=self.ifd_pointers[0])
+        ifd_zero.next += empty_ifd.nbytes
+        ifd_zero.pack_into(new_app1_bytes, offset=self.ifd_pointers[0])
+
+        # Touch up IFD 1 pointers!
+        ifd1 = unpack_from(ifd_cls, bytes_after_new_ifd, offset=0)
+        for tag_index in range(ifd1.count):
+            tag_t = ifd1.tags[tag_index]
+            is_value_in_ifd_tag_itself = value_fits_in_ifd_tag(tag_t, exif_type_cls)
+            if tag_t.tag_id in [ATTRIBUTE_ID_MAP["jpeg_interchange_format"]] or not is_value_in_ifd_tag_itself:
+                tag_t.value_offset += empty_ifd.nbytes
+            ifd1.tags[tag_index] = tag_t
+        ifd1.pack_into(bytes_after_new_ifd, offset=0)
+
+        # Parse new bytes containing the additional placeholder IFD.
+        self.body_bytes = new_app1_bytes + bytes_after_new_ifd
+        self._parse_ifd_segments()
+
+        # Adjust the size of the APP1 header to reflect the new length.
+        app1_len = UInt16.view(self.header_bytes, offset=2)  # 2 bytes into the header, i.e., right after the marker
+        app1_len += empty_ifd.nbytes
+
+        # Add pointer tag to IFD 0.
+        offset_of_new_ifd = self.ifd_pointers[1]  # IFD 1 is pushed back to after the new IFD tag that takes its place
+        self._add_tag("_gps_ifd_pointer", offset_of_new_ifd)
 
     def _add_tag(self, tag, value):
         try:
@@ -30,6 +82,9 @@ class App1MetaData:
             ifd_cls = IfdLe
             ifd_tag_cls = IfdTagLe
 
+        if ifd_number not in self.ifd_pointers:
+            self._add_empty_ifd(ifd_number)
+
         # Make a list of all IFDs that will need to be re-packed with touched up pointers.
         subsequent_ifd_names = [ifd for ifd, offset in self.ifd_pointers.items()
                                 if offset > self.ifd_pointers[ifd_number]]
@@ -40,11 +95,20 @@ class App1MetaData:
         added_bytes = ifd_tag_cls.nbytes
         pointer_value_bytes = 0
         value_count = 1
+
         if tag_type == exif_type_cls.ASCII and len(value) >= 4:
             pointer_value_bytes = len(value) + 1  # add one for null termination
 
         if tag_type == exif_type_cls.ASCII:
             value_count = len(value) + 1
+
+        if tag_type == exif_type_cls.RATIONAL:
+            if isinstance(value, tuple):
+                value_count = len(value)
+            else:
+                value_count = 1
+
+            pointer_value_bytes = value_count * RationalDtype.nbytes
 
         added_bytes += pointer_value_bytes
         # TODO: Support other types after finishing and testing ASCII (e.g., GPS especially)
@@ -84,8 +148,10 @@ class App1MetaData:
             orig_ifd_values = self.body_bytes[target_ifd_offset + target_ifd.nbytes:]
 
         # Determine if a pointer to a value is necessary, and if so, find it.
-        if tag_type == exif_type_cls.ASCII and len(value) >= 4:
+        if (tag_type == exif_type_cls.ASCII and len(value) >= 4) or tag_type == exif_type_cls.RATIONAL:
             value_pointer = subsequent_ifd_offsets[0] + ifd_tag_cls.nbytes  # TODO: Handle no subsequent IFD case
+        elif tag == "_gps_ifd_pointer":  # must set pointer values now or else they'll incorrectly point to 0x00 when parsing
+            value_pointer = value
         else:
             value_pointer = 0
 

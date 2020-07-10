@@ -8,6 +8,7 @@ import unittest
 from exif import Image
 from exif.tests.add_exif_baselines.add_short import ADD_SHORT_BASELINE, ADD_SHORT_LE_BASELINE
 from exif.tests.add_exif_baselines.add_ascii import ADD_ASCII_BASELINE, ADD_ASCII_LE_BASELINE
+from exif.tests.add_exif_baselines.add_gps import ADD_GPS_BASELINE
 from exif.tests.test_little_endian import read_attributes as read_attributes_little_endian
 from exif.tests.test_read_exif import read_attributes_florida_beach
 
@@ -57,6 +58,26 @@ class TestAddExif(unittest.TestCase):
         segment_hex = binascii.hexlify(self.image_alt._segments['APP1'].get_segment_bytes()).decode("utf-8").upper()
         self.assertEqual('\n'.join(textwrap.wrap(segment_hex, 90)),
                          ADD_ASCII_LE_BASELINE)
+
+    def test_add_gps(self):
+        """Test adding GPS-related tags to an image."""
+        self.image_alt.gps_longitude = (112.0, 5.0, 4.18)
+        self.image_alt.gps_latitude = (36.0, 3.0, 11.08)
+        self.image_alt.gps_longitude_ref = "W"
+        self.image_alt.gps_latitude_ref = "N"
+        self.image_alt.gps_altitude = 2189.9896907216494
+        self.image_alt.gps_altitude_ref = 0
+
+        assert self.image_alt.gps_longitude == (112.0, 5.0, 4.18)
+        assert self.image_alt.gps_latitude == (36.0, 3.0, 11.08)
+        assert self.image_alt.gps_longitude_ref == "W"
+        assert self.image_alt.gps_latitude_ref == "N"
+        assert self.image_alt.gps_altitude == 2189.9896907216494
+        assert self.image_alt.gps_altitude_ref == 0
+
+        segment_hex = binascii.hexlify(self.image_alt._segments['APP1'].get_segment_bytes()).decode("utf-8").upper()
+        self.assertEqual('\n'.join(textwrap.wrap(segment_hex, 90)),
+                         ADD_GPS_BASELINE)
 
     def test_add_shorts(self):
         """Test adding two new SHORT tags to an image."""
