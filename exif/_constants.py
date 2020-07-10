@@ -509,7 +509,21 @@ ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description used when 
     "flash": (int(ExifTypes.SHORT), "exif"),
     "focal_length_in_35mm_film": (int(ExifTypes.SHORT), "exif"),
     "focal_plane_resolution_unit": (int(ExifTypes.SHORT), "exif"),
+    "gps_datestamp": (int(ExifTypes.ASCII), "gps"),
+    "gps_dest_bearing_ref": (int(ExifTypes.ASCII), "gps"),
+    "gps_dest_distance_ref": (int(ExifTypes.ASCII), "gps"),
+    "gps_dest_latitude_ref": (int(ExifTypes.ASCII), "gps"),
+    "gps_dest_longitude_ref": (int(ExifTypes.ASCII), "gps"),
     "gps_differential": (int(ExifTypes.SHORT), "gps"),
+    "gps_img_direction_ref": (int(ExifTypes.ASCII), "gps"),
+    "gps_latitude_ref": (int(ExifTypes.ASCII), "gps"),
+    "gps_longitude_ref": (int(ExifTypes.ASCII), "gps"),
+    "gps_map_datum": (int(ExifTypes.ASCII), "gps"),
+    "gps_measure_mode": (int(ExifTypes.ASCII), "gps"),
+    "gps_satellites": (int(ExifTypes.ASCII), "gps"),
+    "gps_speed_ref": (int(ExifTypes.ASCII), "gps"),
+    "gps_status": (int(ExifTypes.ASCII), "gps"),
+    "gps_tack_ref": (int(ExifTypes.ASCII), "gps"),
     "image_description": (int(ExifTypes.ASCII), 0),
     "image_unique_id": (int(ExifTypes.ASCII), "exif"),
     "light_source": (int(ExifTypes.SHORT), "exif"),
@@ -529,7 +543,6 @@ ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description used when 
     "subject_distance_range": (int(ExifTypes.SHORT), "exif"),
     "subject_location": (int(ExifTypes.SHORT), "exif"),
     "white_balance": (int(ExifTypes.SHORT), "exif"),
-    # TODO: Include GPS ASCII
 }
 
 

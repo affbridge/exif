@@ -104,8 +104,10 @@ class App1MetaData:  # TODO: Change ASCII Modify Longer to Delete and Re-Add if 
                                          and "exif" in subsequent_ifd_names)
 
             is_value_in_ifd_tag_itself = value_fits_in_ifd_tag(tag_t, exif_type_cls)
-            if is_ifd_pointer_to_adjust or not is_value_in_ifd_tag_itself:
+            if is_ifd_pointer_to_adjust:
                 tag_t.value_offset += added_bytes
+            elif not is_value_in_ifd_tag_itself:
+                tag_t.value_offset += ifd_tag_cls.nbytes
 
             target_ifd.tags[tag_index] = tag_t
 
@@ -346,4 +348,8 @@ class App1MetaData:  # TODO: Change ASCII Modify Longer to Delete and Re-Add if 
                 # Tag is not in image already.
                 self._add_tag(key, value)
             else:
-                ifd_tag.modify(value)
+                try:
+                    ifd_tag.modify(value)
+                except ValueError:  # e.g., if doesn't fit into tag, try deleting and re-adding
+                    self._delete_ifd_tag(attribute_id)
+                    self._add_tag(key, value)
