@@ -117,6 +117,16 @@ class ExposureProgram(IntEnum):
     """Landscape Kode (For Landscape Photos with the Background in Focus)"""
 
 
+class GpsAltitudeRef(IntEnum):
+    """Altitude used as the reference altitude."""
+
+    ABOVE_SEA_LEVEL = 0
+    """Above Sea Level"""
+
+    BELOW_SEA_LEVEL = 1
+    """Below Sea Level"""
+
+
 class LightSource(IntEnum):
     """Class of the program used by the camera to set exposure when the picture is taken."""
 
