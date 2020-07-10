@@ -350,6 +350,19 @@ class App1MetaData:  # TODO: Change ASCII Modify Longer to Delete and Re-Add if 
             else:
                 try:
                     ifd_tag.modify(value)
-                except ValueError:  # e.g., if doesn't fit into tag, try deleting and re-adding
-                    self._delete_ifd_tag(attribute_id)
-                    self._add_tag(key, value)
+                except ValueError as exec:  # e.g., if doesn't fit into tag, try deleting and re-adding
+                    try:
+                        exif_type = ATTRIBUTE_TYPE_MAP[key][0]
+                    except KeyError:
+                        raise exec
+
+                    if self.endianness == TiffByteOrder.BIG:
+                        exif_type_cls = ExifType
+                    else:
+                        exif_type_cls = ExifTypeLe
+
+                    if exif_type == exif_type_cls.ASCII:
+                        self._delete_ifd_tag(attribute_id)
+                        self._add_tag(key, value)
+                    else:
+                        raise exec
