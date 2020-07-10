@@ -11,12 +11,7 @@ from exif.ifd_tag import (
     Ascii, BaseIfdTag, Byte, ExifVersion, Long, Rational, Short, Slong, Srational, UserComment, WindowsXp)
 
 
-class App1MetaData:  # TODO: Change ASCII Modify Longer to Delete and Re-Add if in Constants for ADding
-
-    # TODO: Add test for ASCII in IFD 0
-    # TODO: Add test for ASCII in EXIF IFD
-    # TODO: Add test for modify longer
-    # TODO: Add little endian tests!
+class App1MetaData:
 
     """APP1 metadata interface class for EXIF tags."""
 
