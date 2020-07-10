@@ -2,14 +2,21 @@
 
 from plum import unpack_from
 
+from plum.int.big import UInt16
+
+from exif._add_tag_utils import value_fits_in_ifd_tag
 from exif._constants import ATTRIBUTE_ID_MAP, ATTRIBUTE_NAME_MAP, ATTRIBUTE_TYPE_MAP, ERROR_IMG_NO_ATTR, ExifMarkers
 from exif._datatypes import ExifType, ExifTypeLe, Ifd, IfdLe, IfdTag, IfdTagLe, TiffByteOrder, TiffHeader
-
 from exif.ifd_tag import (
     Ascii, BaseIfdTag, Byte, ExifVersion, Long, Rational, Short, Slong, Srational, UserComment, WindowsXp)
 
 
-class App1MetaData:
+class App1MetaData:  # TODO: Change ASCII Modify Longer to Delete and Re-Add if in Constants for ADding
+
+    # TODO: Add test for ASCII in IFD 0
+    # TODO: Add test for ASCII in EXIF IFD
+    # TODO: Add test for modify longer
+    # TODO: Add little endian tests!
 
     """APP1 metadata interface class for EXIF tags."""
 
@@ -29,24 +36,48 @@ class App1MetaData:
             ifd_tag_cls = IfdTagLe
 
         # Make a list of all IFDs that will need to be re-packed with touched up pointers.
+        subsequent_ifd_names = [ifd for ifd, offset in self.ifd_pointers.items()
+                                if offset > self.ifd_pointers[ifd_number]]
         subsequent_ifd_offsets = sorted([offset for offset in self.ifd_pointers.values()
                                          if offset > self.ifd_pointers[ifd_number]])
+
+        # Determine the number of bytes that will be injected.
+        added_bytes = ifd_tag_cls.nbytes
+        pointer_value_bytes = 0
+        value_count = 1
+        if tag_type == exif_type_cls.ASCII and len(value) >= 4:
+            pointer_value_bytes = len(value) + 1  # add one for null termination
+
+        if tag_type == exif_type_cls.ASCII:
+            value_count = len(value) + 1
+
+        added_bytes += pointer_value_bytes
+        # TODO: Support other types after finishing and testing ASCII (e.g., GPS especially)
 
         # Keep all bytes prior to the IFD where the new tag will be added.
         new_app1_bytes = self.body_bytes[:self.ifd_pointers[ifd_number]]
 
-        # TODO: Formalize adjusting the next field for IFD 0 too. This is a temporary patch here.
-        ifd_zero = unpack_from(ifd_cls, new_app1_bytes, offset=self.ifd_pointers[0])
-        if ifd_zero.next:
-            ifd_zero.next += ifd_tag_cls.nbytes
-        for tag_index in range(ifd_zero.count):
-            tag_t = ifd_zero.tags[tag_index]
-            if tag_t.tag_id == ATTRIBUTE_ID_MAP["_gps_ifd_pointer"]:  # todo: add analysis for when and when not to check GPS and EXIF TOO!!! DON'T FORGET EXIF!
-                # TODO: interop. IFD pointer too? might need to add throughout package!
-                tag_t.value_offset += ifd_tag_cls.nbytes
-            ifd_zero.tags[tag_index] = tag_t
-        # TODO: The temporary shifting of the GPS and EXIF pointers is also in desperate need of touch up!
-        ifd_zero.pack_into(new_app1_bytes, offset=self.ifd_pointers[0])
+        # If IFD 1 occurs after that added tag, adjust the pointer to it from IFD 0.
+        if ifd_number != 0:
+            ifd_zero = unpack_from(ifd_cls, new_app1_bytes, offset=self.ifd_pointers[0])
+            if ifd_zero.next and 1 in subsequent_ifd_names:
+                ifd_zero.next += added_bytes
+
+            # Also adjust the pointers to the GPS and EXIF IFDs if they occur after the added tag.
+            for tag_index in range(ifd_zero.count):
+                tag_t = ifd_zero.tags[tag_index]
+
+                is_ifd_pointer_to_adjust = (tag_t.tag_id == ATTRIBUTE_ID_MAP["_gps_ifd_pointer"]
+                                            and "gps" in subsequent_ifd_names)
+                is_ifd_pointer_to_adjust |= (tag_t.tag_id == ATTRIBUTE_ID_MAP["_exif_ifd_pointer"]
+                                             and "exif" in subsequent_ifd_names)
+
+                if is_ifd_pointer_to_adjust:
+                    tag_t.value_offset += added_bytes
+
+                ifd_zero.tags[tag_index] = tag_t
+
+            ifd_zero.pack_into(new_app1_bytes, offset=self.ifd_pointers[0])
 
         # Unpack the original bytes of the IFD to which the new tag will be added to.
         target_ifd_offset = self.ifd_pointers[ifd_number]
@@ -57,37 +88,40 @@ class App1MetaData:
         else:
             orig_ifd_values = self.body_bytes[target_ifd_offset + target_ifd.nbytes:]
 
+        # Determine if a pointer to a value is necessary, and if so, find it.
+        if tag_type == exif_type_cls.ASCII and len(value) >= 4:
+            value_pointer = subsequent_ifd_offsets[0] + ifd_tag_cls.nbytes  # TODO: Handle no subsequent IFD case
+        else:
+            value_pointer = 0
+
         # Iterate over the IFD's tags and increase any value offset pointers by the size of an IFD tag.
         for tag_index in range(target_ifd.count):
             tag_t = target_ifd.tags[tag_index]
 
-            is_value_in_ifd_tag_itself = tag_t.type == exif_type_cls.ASCII and tag_t.value_count <= 4
-            is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.BYTE
-            is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.SHORT
-            is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.LONG
-            is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.SLONG
-            is_value_in_ifd_tag_itself |= tag_t.tag_id == ATTRIBUTE_ID_MAP["exif_version"]
-            is_value_in_ifd_tag_itself |= tag_t.tag_id == ATTRIBUTE_ID_MAP["flashpix_version"]
+            is_ifd_pointer_to_adjust = (tag_t.tag_id == ATTRIBUTE_ID_MAP["_gps_ifd_pointer"]
+                                        and "gps" in subsequent_ifd_names)
+            is_ifd_pointer_to_adjust |= (tag_t.tag_id == ATTRIBUTE_ID_MAP["_exif_ifd_pointer"]
+                                         and "exif" in subsequent_ifd_names)
 
-            if not is_value_in_ifd_tag_itself:
-                tag_t.value_offset += ifd_tag_cls.nbytes
+            is_value_in_ifd_tag_itself = value_fits_in_ifd_tag(tag_t, exif_type_cls)
+            if is_ifd_pointer_to_adjust or not is_value_in_ifd_tag_itself:
+                tag_t.value_offset += added_bytes
 
             target_ifd.tags[tag_index] = tag_t
 
         # Add the new tag to the IFD.
-        # TODO: This currently assumes that the tag value is intra-IFD!  Support adding with values longer than 4 bytes!
-        # TODO: Support different value counts (e.g., ASCII, GPS) too!
         target_ifd.count += 1
         target_ifd.tags.append(ifd_tag_cls(
-            tag_id=ATTRIBUTE_ID_MAP[tag], type=tag_type, value_count=1, value_offset=0))
+            tag_id=ATTRIBUTE_ID_MAP[tag], type=tag_type, value_count=value_count, value_offset=value_pointer))
 
         # If necessary, touch up the pointer to the next IFD.
-        if target_ifd.next:  # TODO: Support adding with values longer than 4 bytes here too!
-            target_ifd.next += ifd_tag_cls.nbytes
+        if target_ifd.next:
+            target_ifd.next += added_bytes
 
         # Pack new IFD bytes into the new body bytes (along with the pre-existing values that follow).
         target_ifd.pack_into(new_app1_bytes, offset=target_ifd_offset)
         new_app1_bytes += orig_ifd_values
+        new_app1_bytes += b"\x00" * pointer_value_bytes
 
         while subsequent_ifd_offsets:
             # TODO: Fix all this duplication
@@ -101,31 +135,21 @@ class App1MetaData:
 
             for tag_index in range(target_ifd.count):
                 tag_t = target_ifd.tags[tag_index]
-
-                is_value_in_ifd_tag_itself = tag_t.type == exif_type_cls.ASCII and tag_t.value_count <= 4
-                is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.BYTE
-                is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.SHORT
-                is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.LONG
-                is_value_in_ifd_tag_itself |= tag_t.type == exif_type_cls.SLONG
-                is_value_in_ifd_tag_itself |= tag_t.tag_id == ATTRIBUTE_ID_MAP["exif_version"]
-                is_value_in_ifd_tag_itself |= tag_t.tag_id == ATTRIBUTE_ID_MAP["flashpix_version"]
-
+                is_value_in_ifd_tag_itself = value_fits_in_ifd_tag(tag_t, exif_type_cls)
                 if tag_t.tag_id in [ATTRIBUTE_ID_MAP["jpeg_interchange_format"]] or not is_value_in_ifd_tag_itself:
-                    tag_t.value_offset += ifd_tag_cls.nbytes
+                    tag_t.value_offset += added_bytes
 
                 target_ifd.tags[tag_index] = tag_t
 
-            if target_ifd.next:  # TODO: Support adding with values longer than 4 bytes here too!
-                target_ifd.next += ifd_tag_cls.nbytes
+            if target_ifd.next:
+                target_ifd.next += added_bytes
 
             new_app1_bytes += target_ifd.pack()
             new_app1_bytes += orig_ifd_values
 
         # Finally, adjust the size of the APP1 header to reflect the new length.
-        # TODO: Clean this up and abstract it.
-        from plum.int.big import UInt16
-        app1_len = UInt16.view(self.header_bytes, offset=2)
-        app1_len += IfdTag.nbytes
+        app1_len = UInt16.view(self.header_bytes, offset=2)  # 2 bytes into the header, i.e., right after the marker
+        app1_len += added_bytes
 
         # Reload to pick up on new bytes arrangement and then modify the currently-zero value.
         self.body_bytes = new_app1_bytes

@@ -496,26 +496,40 @@ ATTRIBUTE_ID_MAP = {
 ATTRIBUTE_NAME_MAP = {value: key for key, value in ATTRIBUTE_ID_MAP.items()}
 
 ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description used when adding new tags
+    "artist": (int(ExifTypes.ASCII), 0),
     "color_space": (int(ExifTypes.SHORT), "exif"),
     "contrast": (int(ExifTypes.SHORT), "exif"),
+    "copyright": (int(ExifTypes.ASCII), 0),
     "custom_rendered": (int(ExifTypes.SHORT), "exif"),
+    "datetime": (int(ExifTypes.ASCII), 0),
+    "datetime_digitized": (int(ExifTypes.ASCII), "exif"),
+    "datetime_original": (int(ExifTypes.ASCII), "exif"),
     "exposure_mode": (int(ExifTypes.SHORT), "exif"),
     "exposure_program": (int(ExifTypes.SHORT), "exif"),
     "flash": (int(ExifTypes.SHORT), "exif"),
     "focal_length_in_35mm_film": (int(ExifTypes.SHORT), "exif"),
     "focal_plane_resolution_unit": (int(ExifTypes.SHORT), "exif"),
     "gps_differential": (int(ExifTypes.SHORT), "gps"),
+    "image_description": (int(ExifTypes.ASCII), 0),
+    "image_unique_id": (int(ExifTypes.ASCII), "exif"),
     "light_source": (int(ExifTypes.SHORT), "exif"),
+    "make": (int(ExifTypes.ASCII), 0),
     "metering_mode": (int(ExifTypes.SHORT), "exif"),
+    "model": (int(ExifTypes.ASCII), 0),
     "pixel_x_dimension": (int(ExifTypes.SHORT), "exif"),
     "pixel_y_dimension": (int(ExifTypes.SHORT), "exif"),
     "saturation": (int(ExifTypes.SHORT), "exif"),
     "scene_capture_type": (int(ExifTypes.SHORT), "exif"),
     "sensing_method": (int(ExifTypes.SHORT), "exif"),
+    "software": (int(ExifTypes.ASCII), 0),
     "sharpness": (int(ExifTypes.SHORT), "exif"),
+    "subsec_time": (int(ExifTypes.ASCII), "exif"),
+    "subsec_time_original": (int(ExifTypes.ASCII), "exif"),
+    "subsec_time_digitized": (int(ExifTypes.ASCII), "exif"),
     "subject_distance_range": (int(ExifTypes.SHORT), "exif"),
     "subject_location": (int(ExifTypes.SHORT), "exif"),
     "white_balance": (int(ExifTypes.SHORT), "exif"),
+    # TODO: Include GPS ASCII
 }
 
 
