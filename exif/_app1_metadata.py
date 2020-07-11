@@ -13,7 +13,6 @@ from exif.ifd_tag._rational import RationalDtype
 from exif.ifd_tag._srational import SrationalDtype
 
 
-# TODO: Get to near 100% coverage
 class App1MetaData:
 
     """APP1 metadata interface class for EXIF tags."""
@@ -66,7 +65,8 @@ class App1MetaData:
         offset_of_new_ifd = self.ifd_pointers[1]  # IFD 1 is pushed back to after the new IFD tag that takes its place
         self._add_tag("_gps_ifd_pointer", offset_of_new_ifd)
 
-    def _add_tag(self, tag, value):
+    def _add_tag(self, tag, value):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+        # FUTURE: This method could likely use some future cleanup and abstraction.
         try:
             tag_type, ifd_number = ATTRIBUTE_TYPE_MAP[tag]
         except KeyError:
@@ -150,13 +150,15 @@ class App1MetaData:
             orig_ifd_values = self.body_bytes[target_ifd_offset + target_ifd.nbytes:]
 
         # Determine if a pointer to a value is necessary, and if so, find it.
-        if (tag_type == exif_type_cls.ASCII and len(value) >= 4) or tag_type in [exif_type_cls.RATIONAL, exif_type_cls.SRATIONAL]:
+        if (tag_type == exif_type_cls.ASCII and len(value) >= 4) or tag_type in [
+                exif_type_cls.RATIONAL, exif_type_cls.SRATIONAL]:
             if subsequent_ifd_offsets:
                 value_pointer = subsequent_ifd_offsets[0] + ifd_tag_cls.nbytes
             else:
                 # Can put at end since if EXIF or GPS is the last IFD, there must not be a thumbnail and IFD 1.
                 value_pointer = len(self.body_bytes) + ifd_tag_cls.nbytes
-        elif tag == "_gps_ifd_pointer":  # must set pointer values now or else they'll incorrectly point to 0x00 when parsing
+        elif tag == "_gps_ifd_pointer":
+            # Must set pointer values now or else they'll incorrectly point to 0x00 when parsing.
             value_pointer = value
         else:
             value_pointer = 0
@@ -192,8 +194,9 @@ class App1MetaData:
         new_app1_bytes += orig_ifd_values
         new_app1_bytes += b"\x00" * pointer_value_bytes
 
+        # Touch up pointers in any subsequent IFDs.
+        # FUTURE: This could likely be better abstracted!
         while subsequent_ifd_offsets:
-            # TODO: Fix all this duplication
             current_ifd_offset = subsequent_ifd_offsets.pop(0)
             target_ifd = unpack_from(ifd_cls, self.body_bytes, offset=current_ifd_offset)
 
@@ -253,13 +256,13 @@ class App1MetaData:
         # Regenerate information about existing tags.
         self._parse_ifd_segments()
 
-    def _extract_thumbnail(self):  # TODO: Adjust this to use JPEGInterchangeFormat value.
+    def _extract_thumbnail(self):
         if 1 in self.ifd_pointers:  # IFD segment 1 contains thumbnail (if present)
             hex_after_ifd1 = self.body_bytes[self.ifd_pointers[1]:]
             try:
                 start_index = hex_after_ifd1.index(ExifMarkers.SOI)
                 end_index = hex_after_ifd1.index(ExifMarkers.EOI) + len(ExifMarkers.EOI)
-            except ValueError:
+            except ValueError:  # pragma: no cover
                 pass  # no thumbnail
             else:
                 self.thumbnail_bytes = hex_after_ifd1[start_index:end_index]
