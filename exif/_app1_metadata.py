@@ -12,8 +12,6 @@ from exif.ifd_tag import (
 from exif.ifd_tag._rational import RationalDtype
 
 
-# TODO: Add usage guides for adding (quick start and mor edetailed in usage page with GPS and datetime examples)
-# TODO: I think this should finally be a v1.0.0 release :)
 class App1MetaData:
 
     """APP1 metadata interface class for EXIF tags."""

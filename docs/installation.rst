@@ -7,8 +7,7 @@ Installation
 Requirements
 ************
 
-* Python 3.5+
-* Windows Vista or Later
+* Python 3.6+
 
 ******************
 Installation Steps

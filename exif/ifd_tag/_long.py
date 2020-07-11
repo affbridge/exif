@@ -7,7 +7,7 @@ class Long(BaseIfdTag):
 
     """IFD LONG tag structure parser class."""
 
-    def modify(self, value):  # pragma: no cover
+    def modify(self, value):
         """Modify tag value.
 
         :param value: new tag value
