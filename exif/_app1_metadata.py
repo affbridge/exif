@@ -10,6 +10,7 @@ from exif._datatypes import ExifType, ExifTypeLe, Ifd, IfdLe, IfdTag, IfdTagLe, 
 from exif.ifd_tag import (
     Ascii, BaseIfdTag, Byte, ExifVersion, Long, Rational, Short, Slong, Srational, UserComment, WindowsXp)
 from exif.ifd_tag._rational import RationalDtype
+from exif.ifd_tag._srational import SrationalDtype
 
 
 # TODO: Get to near 100% coverage
@@ -108,8 +109,11 @@ class App1MetaData:
 
             pointer_value_bytes = value_count * RationalDtype.nbytes
 
+        if tag_type == exif_type_cls.SRATIONAL:
+            # Value count stays at 1 since EXIF specification does not define multi-valued SRATIONAL tags.
+            pointer_value_bytes = value_count * SrationalDtype.nbytes
+
         added_bytes += pointer_value_bytes
-        # TODO: Support other types after finishing and testing ASCII (e.g., GPS especially)
 
         # Keep all bytes prior to the IFD where the new tag will be added.
         new_app1_bytes = self.body_bytes[:self.ifd_pointers[ifd_number]]
@@ -146,7 +150,7 @@ class App1MetaData:
             orig_ifd_values = self.body_bytes[target_ifd_offset + target_ifd.nbytes:]
 
         # Determine if a pointer to a value is necessary, and if so, find it.
-        if (tag_type == exif_type_cls.ASCII and len(value) >= 4) or tag_type == exif_type_cls.RATIONAL:
+        if (tag_type == exif_type_cls.ASCII and len(value) >= 4) or tag_type in [exif_type_cls.RATIONAL, exif_type_cls.SRATIONAL]:
             if subsequent_ifd_offsets:
                 value_pointer = subsequent_ifd_offsets[0] + ifd_tag_cls.nbytes
             else:

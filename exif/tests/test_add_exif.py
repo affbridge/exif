@@ -96,13 +96,15 @@ class TestAddExif(unittest.TestCase):
         self.assertEqual('\n'.join(textwrap.wrap(segment_hex, 90)),
                          ADD_SHORT_BASELINE)
 
-    def test_add_shorts_le(self):
-        """Test adding two new SHORT tags to a little endian image."""
+    def test_add_shorts_and_srational_le(self):
+        """Test adding two new SHORT tags and an SRATIONAL to a little endian image."""
         self.image_le.contrast = 1
         self.image_le.light_source = 24
+        self.image_le.brightness_value = 5.4321
 
         assert self.image_le.light_source == 24
         assert self.image_le.contrast == 1
+        assert self.image_le.brightness_value == 5.4321
 
         # Verify pre-existing attributes can still be read as expected.
         for attribute, func, value in read_attributes_little_endian:
@@ -127,6 +129,7 @@ def test_add_to_scanner_image():
     image.model = "Scan-o-Matic 5000"
     image.datetime_original = "1999:12:31 23:49:12"
     image.datetime_digitized = "2020:07:11 10:11:37"
+    image.brightness_value = 10.9876  # provides coverage for SRATIONAL
 
     assert image.has_exif
     assert image.gps_latitude == (41.0, 29.0, 57.48)
@@ -139,6 +142,7 @@ def test_add_to_scanner_image():
     assert image.model == "Scan-o-Matic 5000"
     assert image.datetime_original == "1999:12:31 23:49:12"
     assert image.datetime_digitized == "2020:07:11 10:11:37"
+    assert image.brightness_value == 10.9876  # provides coverage for SRATIONAL
 
     segment_hex = binascii.hexlify(image._segments['APP1'].get_segment_bytes()).decode("utf-8").upper()
     assert '\n'.join(textwrap.wrap(segment_hex, 90)) == ADD_TO_SCANNED_IMAGE_BASELINE

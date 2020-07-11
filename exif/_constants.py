@@ -508,6 +508,7 @@ ATTRIBUTE_NAME_MAP = {value: key for key, value in ATTRIBUTE_ID_MAP.items()}
 ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description used when adding new tags
     "aperture_value": (int(ExifTypes.RATIONAL), "exif"),
     "artist": (int(ExifTypes.ASCII), 0),
+    "brightness_value": (int(ExifTypes.SRATIONAL), "exif"),
     "color_space": (int(ExifTypes.SHORT), "exif"),
     "contrast": (int(ExifTypes.SHORT), "exif"),
     "copyright": (int(ExifTypes.ASCII), 0),
@@ -516,6 +517,7 @@ ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description used when 
     "datetime_digitized": (int(ExifTypes.ASCII), "exif"),
     "datetime_original": (int(ExifTypes.ASCII), "exif"),
     "digital_zoom_ratio": (int(ExifTypes.RATIONAL), "exif"),
+    "exposure_bias_value": (int(ExifTypes.SRATIONAL), "exif"),
     "exposure_index": (int(ExifTypes.RATIONAL), "exif"),
     "exposure_mode": (int(ExifTypes.SHORT), "exif"),
     "exposure_program": (int(ExifTypes.SHORT), "exif"),
@@ -568,6 +570,7 @@ ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description used when 
     "saturation": (int(ExifTypes.SHORT), "exif"),
     "scene_capture_type": (int(ExifTypes.SHORT), "exif"),
     "sensing_method": (int(ExifTypes.SHORT), "exif"),
+    "shutter_speed_value": (int(ExifTypes.SRATIONAL), "exif"),
     "software": (int(ExifTypes.ASCII), 0),
     "sharpness": (int(ExifTypes.SHORT), "exif"),
     "spectral_sensitivity": (int(ExifTypes.ASCII), "exif"),
@@ -580,7 +583,6 @@ ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description used when 
     "white_balance": (int(ExifTypes.SHORT), "exif"),
     "_exif_ifd_pointer": (int(ExifTypes.LONG), 0),
     "_gps_ifd_pointer": (int(ExifTypes.LONG), 0),
-    # TODO: Add slong, and srational for EXIF and test
 }
 
 
