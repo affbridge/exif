@@ -12,6 +12,7 @@ from exif.ifd_tag import (
 from exif.ifd_tag._rational import RationalDtype
 
 
+# TODO: Get to near 100% coverage
 class App1MetaData:
 
     """APP1 metadata interface class for EXIF tags."""
@@ -26,11 +27,9 @@ class App1MetaData:
         if self.endianness == TiffByteOrder.BIG:
             exif_type_cls = ExifType
             ifd_cls = Ifd
-            ifd_tag_cls = IfdTag
         else:
             exif_type_cls = ExifTypeLe
             ifd_cls = IfdLe
-            ifd_tag_cls = IfdTagLe
 
         new_app1_bytes = self.body_bytes[:self.ifd_pointers[1]]
         bytes_after_new_ifd = self.body_bytes[self.ifd_pointers[1]:]
