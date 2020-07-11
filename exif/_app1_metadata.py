@@ -13,6 +13,7 @@ from exif.ifd_tag._rational import RationalDtype
 
 
 # TODO: Add usage guides
+# TODO: Need to fix and test adding metadata to an image without any!
 class App1MetaData:
 
     """APP1 metadata interface class for EXIF tags."""
