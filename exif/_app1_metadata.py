@@ -12,8 +12,8 @@ from exif.ifd_tag import (
 from exif.ifd_tag._rational import RationalDtype
 
 
-# TODO: Add usage guides
-# TODO: Need to fix and test adding metadata to an image without any!
+# TODO: Add usage guides for adding (quick start and mor edetailed in usage page with GPS and datetime examples)
+# TODO: I think this should finally be a v1.0.0 release :)
 class App1MetaData:
 
     """APP1 metadata interface class for EXIF tags."""
@@ -150,7 +150,11 @@ class App1MetaData:
 
         # Determine if a pointer to a value is necessary, and if so, find it.
         if (tag_type == exif_type_cls.ASCII and len(value) >= 4) or tag_type == exif_type_cls.RATIONAL:
-            value_pointer = subsequent_ifd_offsets[0] + ifd_tag_cls.nbytes  # TODO: Handle no subsequent IFD case
+            if subsequent_ifd_offsets:
+                value_pointer = subsequent_ifd_offsets[0] + ifd_tag_cls.nbytes
+            else:
+                # Can put at end since if EXIF or GPS is the last IFD, there must not be a thumbnail and IFD 1.
+                value_pointer = len(self.body_bytes) + ifd_tag_cls.nbytes
         elif tag == "_gps_ifd_pointer":  # must set pointer values now or else they'll incorrectly point to 0x00 when parsing
             value_pointer = value
         else:

@@ -5,10 +5,11 @@ import os
 import textwrap
 import unittest
 
-from exif import Image
+from exif import GpsAltitudeRef, Image
 from exif.tests.add_exif_baselines.add_short import ADD_SHORT_BASELINE, ADD_SHORT_LE_BASELINE
 from exif.tests.add_exif_baselines.add_ascii import ADD_ASCII_BASELINE, ADD_ASCII_LE_BASELINE
 from exif.tests.add_exif_baselines.add_gps import ADD_GPS_BASELINE
+from exif.tests.add_exif_baselines.add_to_scan import ADD_TO_SCANNED_IMAGE_BASELINE
 from exif.tests.test_little_endian import read_attributes as read_attributes_little_endian
 from exif.tests.test_read_exif import read_attributes_florida_beach
 
@@ -66,14 +67,14 @@ class TestAddExif(unittest.TestCase):
         self.image_alt.gps_longitude_ref = "W"
         self.image_alt.gps_latitude_ref = "N"
         self.image_alt.gps_altitude = 2189.9896907216494
-        self.image_alt.gps_altitude_ref = 0
+        self.image_alt.gps_altitude_ref = GpsAltitudeRef.ABOVE_SEA_LEVEL
 
         assert self.image_alt.gps_longitude == (112.0, 5.0, 4.18)
         assert self.image_alt.gps_latitude == (36.0, 3.0, 11.08)
         assert self.image_alt.gps_longitude_ref == "W"
         assert self.image_alt.gps_latitude_ref == "N"
         assert self.image_alt.gps_altitude == 2189.9896907216494
-        assert self.image_alt.gps_altitude_ref == 0
+        assert self.image_alt.gps_altitude_ref == GpsAltitudeRef.ABOVE_SEA_LEVEL
 
         segment_hex = binascii.hexlify(self.image_alt._segments['APP1'].get_segment_bytes()).decode("utf-8").upper()
         self.assertEqual('\n'.join(textwrap.wrap(segment_hex, 90)),
@@ -110,3 +111,34 @@ class TestAddExif(unittest.TestCase):
         segment_hex = binascii.hexlify(self.image_le._segments['APP1'].get_segment_bytes()).decode("utf-8").upper()
         self.assertEqual('\n'.join(textwrap.wrap(segment_hex, 90)),
                          ADD_SHORT_LE_BASELINE)
+
+
+def test_add_to_scanner_image():
+    """Test adding metadata to a scanner-produced JPEG without any pre-existing APP1 or EXIF."""
+    image = Image(os.path.join(os.path.dirname(__file__), 'scanner_without_app1.jpg'))
+    assert not image.has_exif
+    image.gps_latitude = (41.0, 29.0, 57.48)
+    image.gps_latitude_ref = "N"
+    image.gps_longitude = (81.0, 41.0, 39.84)
+    image.gps_longitude_ref = "W"
+    image.gps_altitude = 199.034
+    image.gps_altitude_ref = GpsAltitudeRef.ABOVE_SEA_LEVEL
+    image.make = "Acme Scanner Company"
+    image.model = "Scan-o-Matic 5000"
+    image.datetime_original = "1999:12:31 23:49:12"
+    image.datetime_digitized = "2020:07:11 10:11:37"
+
+    assert image.has_exif
+    assert image.gps_latitude == (41.0, 29.0, 57.48)
+    assert image.gps_latitude_ref == "N"
+    assert image.gps_longitude == (81.0, 41.0, 39.84)
+    assert image.gps_longitude_ref == "W"
+    assert image.gps_altitude == 199.034
+    assert image.gps_altitude_ref == GpsAltitudeRef.ABOVE_SEA_LEVEL
+    assert image.make == "Acme Scanner Company"
+    assert image.model == "Scan-o-Matic 5000"
+    assert image.datetime_original == "1999:12:31 23:49:12"
+    assert image.datetime_digitized == "2020:07:11 10:11:37"
+
+    segment_hex = binascii.hexlify(image._segments['APP1'].get_segment_bytes()).decode("utf-8").upper()
+    assert '\n'.join(textwrap.wrap(segment_hex, 90)) == ADD_TO_SCANNED_IMAGE_BASELINE
