@@ -12,7 +12,7 @@ Now, the value is returned as ``0`` and the exception is no longer raised.
 
 This patch addresses the following GitLab user issue:
 
-* Cannot read EXIF tag containing excess trailing bytes. (https://gitlab.com/TNThieding/exif/issues/26)
+* ``ZeroDivisionError`` reported when reading ``lens_specification``. (https://gitlab.com/TNThieding/exif/issues/26)
 
 
 **************************************************************************************************
