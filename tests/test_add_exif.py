@@ -6,12 +6,12 @@ import textwrap
 import unittest
 
 from exif import GpsAltitudeRef, Image
-from exif.tests.add_exif_baselines.add_short import ADD_SHORT_BASELINE, ADD_SHORT_LE_BASELINE
-from exif.tests.add_exif_baselines.add_ascii import ADD_ASCII_BASELINE, ADD_ASCII_LE_BASELINE
-from exif.tests.add_exif_baselines.add_gps import ADD_GPS_BASELINE
-from exif.tests.add_exif_baselines.add_to_scan import ADD_TO_SCANNED_IMAGE_BASELINE
-from exif.tests.test_little_endian import read_attributes as read_attributes_little_endian
-from exif.tests.test_read_exif import read_attributes_florida_beach
+from .add_exif_baselines.add_short import ADD_SHORT_BASELINE, ADD_SHORT_LE_BASELINE
+from .add_exif_baselines.add_ascii import ADD_ASCII_BASELINE, ADD_ASCII_LE_BASELINE
+from .add_exif_baselines.add_gps import ADD_GPS_BASELINE
+from .add_exif_baselines.add_to_scan import ADD_TO_SCANNED_IMAGE_BASELINE
+from .test_little_endian import read_attributes as read_attributes_little_endian
+from .test_read_exif import read_attributes_florida_beach
 
 # pylint: disable=protected-access
 
