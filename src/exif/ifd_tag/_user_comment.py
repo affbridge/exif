@@ -49,7 +49,6 @@ class UserComment(BaseIfdTag):
         string_value_offset = self.tag_view.value_offset.get() + USER_COMMENT_CHARACTER_CODE_LEN_BYTES
         string_len = self.tag_view.value_count.get() - USER_COMMENT_CHARACTER_CODE_LEN_BYTES
 
-        print(getbytes(self._app1_ref.body_bytes, self.tag_view.value_offset.get(), nbytes=USER_COMMENT_CHARACTER_CODE_LEN_BYTES))
         value_bytes, _ = getbytes(self._app1_ref.body_bytes, string_value_offset, nbytes=string_len)
         return AsciiStr.unpack(value_bytes)
 

@@ -7,10 +7,16 @@ Release Notes
 *****************************************************************************
 
 Previously, attempting to add either a focal length or user comment  tag to an image resulted in an ``AttributeError``.
+In addition, this patch changes attribute getters and setters such that they are not case-sensitive (e.g.,
+``image.Copyright`` is treated the same as ``image.copyright``).
+
+This patch addresses the following GitLab user issue:
+
+* Cannot add user comments to images without preexisting metadata. (https://gitlab.com/TNThieding/exif/issues/24)
 
 This release includes the following under-the-hood changes:
 
-- Don't distribute unit tests with the packaged source code (e.g., when installing via ``pip``).
+* Don't distribute unit tests with the packaged source code (e.g., when installing via ``pip``).
 
 
 ****************************************************************

@@ -406,7 +406,7 @@ class App1MetaData:
     def __getattr__(self, item):
         """If attribute is not a class member, get the value of the EXIF tag of the same name."""
         try:
-            attribute_id = ATTRIBUTE_ID_MAP[item]
+            attribute_id = ATTRIBUTE_ID_MAP[item.lower()]
         except KeyError:
             raise AttributeError("unknown image attribute {0}".format(item))
 
