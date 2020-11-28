@@ -2,11 +2,15 @@
 Release Notes
 #############
 
-***********************************************************
-[1.0.4] Fix adding focal length tag to images. (2020-11-28)
-***********************************************************
+*****************************************************************************
+[1.0.4] Fix adding focal length and user comment tags to images. (2020-11-28)
+*****************************************************************************
 
-Previously, attempting to add a focal length tag to an image resulted in an ``AttributeError``.
+Previously, attempting to add either a focal length or user comment  tag to an image resulted in an ``AttributeError``.
+
+This release includes the following under-the-hood changes:
+
+- Don't distribute unit tests with the packaged source code (e.g., when installing via ``pip``).
 
 
 ****************************************************************

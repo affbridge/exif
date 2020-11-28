@@ -584,6 +584,7 @@ ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description used when 
     "subject_distance": (int(ExifTypes.RATIONAL), "exif"),
     "subject_distance_range": (int(ExifTypes.SHORT), "exif"),
     "subject_location": (int(ExifTypes.SHORT), "exif"),
+    "user_comment": (7, "exif"),  # 7 is UNDEFINED (if packed in enum, it would cause downstream issues)
     "white_balance": (int(ExifTypes.SHORT), "exif"),
     "_exif_ifd_pointer": (int(ExifTypes.LONG), 0),
     "_gps_ifd_pointer": (int(ExifTypes.LONG), 0),
