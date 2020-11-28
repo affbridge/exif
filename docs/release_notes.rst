@@ -2,6 +2,13 @@
 Release Notes
 #############
 
+***********************************************************
+[1.0.4] Fix adding focal length tag to images. (2020-11-28)
+***********************************************************
+
+Previously, attempting to add a focal length tag to an image resulted in an ``AttributeError``.
+
+
 ****************************************************************
 [1.0.3] Fix ``ValueError`` when SSHORT are present. (2020-11-15)
 ****************************************************************

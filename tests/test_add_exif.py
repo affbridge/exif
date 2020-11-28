@@ -8,6 +8,7 @@ import unittest
 from exif import GpsAltitudeRef, Image
 from .add_exif_baselines.add_short import ADD_SHORT_BASELINE, ADD_SHORT_LE_BASELINE
 from .add_exif_baselines.add_ascii import ADD_ASCII_BASELINE, ADD_ASCII_LE_BASELINE
+from .add_exif_baselines.add_rational import ADD_RATIONAL_BASELINE
 from .add_exif_baselines.add_gps import ADD_GPS_BASELINE
 from .add_exif_baselines.add_to_scan import ADD_TO_SCANNED_IMAGE_BASELINE
 from .test_little_endian import read_attributes as read_attributes_little_endian
@@ -79,6 +80,15 @@ class TestAddExif(unittest.TestCase):
         segment_hex = binascii.hexlify(self.image_alt._segments['APP1'].get_segment_bytes()).decode("utf-8").upper()
         self.assertEqual('\n'.join(textwrap.wrap(segment_hex, 90)),
                          ADD_GPS_BASELINE)
+
+    def test_add_rational(self):
+        """Test adding new RATIONAL tags to an image."""
+        self.image_alt.focal_length = 123.45
+        assert self.image_alt.focal_length == 123.45
+
+        segment_hex = binascii.hexlify(self.image_alt._segments['APP1'].get_segment_bytes()).decode("utf-8").upper()
+        self.assertEqual('\n'.join(textwrap.wrap(segment_hex, 90)),
+                         ADD_RATIONAL_BASELINE)
 
     def test_add_shorts(self):
         """Test adding two new SHORT tags to an image."""

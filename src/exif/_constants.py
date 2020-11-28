@@ -528,6 +528,7 @@ ATTRIBUTE_TYPE_MAP = {  # tuple of type ID and IFD number description used when 
     "f_number": (int(ExifTypes.RATIONAL), "exif"),
     "flash": (int(ExifTypes.SHORT), "exif"),
     "flash_energy": (int(ExifTypes.RATIONAL), "exif"),
+    "focal_length": (int(ExifTypes.RATIONAL), "exif"),
     "focal_length_in_35mm_film": (int(ExifTypes.SHORT), "exif"),
     "focal_plane_resolution_unit": (int(ExifTypes.SHORT), "exif"),
     "gain_control": (int(ExifTypes.RATIONAL), "exif"),
